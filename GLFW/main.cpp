@@ -200,12 +200,6 @@ int main(int argc, char** argv)
 		glViewport(0, 0, width, height);
 	}
 
-	float verts[] = {
-		-0.5f, -0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,
-		 0.0f,  0.5f, 0.0f
-	};
-
 	// TODO: Maybe organize the code a bit? No? Ok...
 	int fileError;
 	// Read vertex shader
@@ -300,6 +294,17 @@ int main(int argc, char** argv)
 	glDeleteShader(fragmentShader);
 
 	// Create vertex objects
+	float verts[] = {
+		//     Position         Colors
+		 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.5f,
+		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.5f,
+		-0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 1.0f,
+		-0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f
+	};
+	unsigned int indices[] = {
+		0, 1, 3,
+		1, 2, 3
+	};
 
 	// Initialize VAO
 	unsigned int vao;
@@ -309,24 +314,58 @@ int main(int argc, char** argv)
 	unsigned int vbo;
 	glGenBuffers(1, &vbo);
 
+	// Initialize EBO
+	unsigned int ebo;
+	glGenBuffers(1, &ebo);
+
+	// Use this vao
 	glBindVertexArray(vao);
 
 	// Pass data to vbo
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_DYNAMIC_DRAW);
+
+	// Pass data to ebo
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// Pass vertex attributes
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(sizeof(float) * 3));
 	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+
+	glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
+
+	// Wireframe!
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	while (!glfwWindowShouldClose(window))
 	{
-		double time = glfwGetTime();
+		double offset = sin(glfwGetTime()) / 2.0f + 0.5f;
+		for (int i = 3; i < sizeof(verts) / sizeof(float); ++i)
+		{
+			if (i % 6 != 0)
+			{
+				verts[i] = offset;
+			}
+			// Skip the position data
+			else
+			{
+				i += 2;	// One index is skipped on the loop part
+			}
+		}
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUseProgram(shaderProgram);
+
 		glBindVertexArray(vao);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_DYNAMIC_DRAW);
+
+		glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);	// Probably when you want to draw more than one object
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

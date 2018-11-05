@@ -17,6 +17,9 @@ struct Options
 	bool showHelp = false;				// Print help and exit
 } *options = new Options;
 
+// Function to call on key input
+void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+
 // Function to call when glfw encounters an error
 void errorCallback(int error, const char *description);
 
@@ -43,6 +46,14 @@ void showHelp()
 {
 	std::cout << "Hi! I'm helping!" << std::endl;
 	exit(0);
+}
+
+void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+	if (key == GLFW_KEY_ESCAPE)
+	{
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	}
 }
 
 void errorCallback(int error, const char *description)
@@ -101,7 +112,6 @@ void parseArguments(int argc, char **argv)
 	}
 }
 
-
 void parseDimensions(char **argv)
 {
 	if (options->dimensions != NULL)
@@ -144,8 +154,15 @@ int main(int argc, char** argv)
 
 	std::cout << "Physical size: " << width << "mm x " << height << "mm" << std::endl;
 
-	//GLFWwindow *window = glfwCreateWindow(mode->width, mode->height, "Window", monitor, NULL);
-	GLFWwindow *window = glfwCreateWindow(640, 480, "Window", NULL, NULL);
+	GLFWwindow *window;
+	if (options->fullscreen)
+	{
+		window = glfwCreateWindow(mode->width, mode->height, "Window", monitor, NULL);
+	}
+	else
+	{
+		window = glfwCreateWindow(options->dimensions->width, options->dimensions->height, "Window", NULL, NULL);
+	}
 	if (!window)
 	{
 		std::cerr << "Failed to create window" << std::endl;
@@ -153,6 +170,23 @@ int main(int argc, char** argv)
 
 	glfwMakeContextCurrent(window);
 	glewInit();
+
+	glfwSetKeyCallback(window, keyCallback);
+
+	{
+		int width, height;
+		glfwGetFramebufferSize(window, &width, &height);
+		glViewport(0, 0, width, height);
+	}
+
+	while (!glfwWindowShouldClose(window))
+	{
+		double time = glfwGetTime();
+
+		glClear(GL_COLOR_BUFFER_BIT);
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
 
 	glfwTerminate();
 	return 0;

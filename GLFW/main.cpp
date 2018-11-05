@@ -2,6 +2,21 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+// If only there was a data structure that could
+// make simple mappings from readable name to number...
+#define EXIT_STATUS_NORMAL 0
+
+#define EXIT_STATUS_INVALID_FLAG 1
+
+#define EXIT_STATUS_VERTEX_SHADER_ERROR 2
+#define EXIT_STATUS_FRAGMENT_SHADER_ERROR 3
+#define EXIT_STATUS_SHADER_PROGRAM_LINK_ERROR 4
+
+#define EXIT_STATUS_FAILED_WINDOW_CREATION 5
+
+#define EXIT_STATUS_FILE_READ_ERROR 6
+#define EXIT_STATUS_FILE_OPEN_ERROR 7
+
 struct Dimensions
 {
 	int width = 0;
@@ -45,7 +60,6 @@ void showHelp();
 void showHelp()
 {
 	std::cout << "Hi! I'm helping!" << std::endl;
-	exit(0);
 }
 
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -78,18 +92,20 @@ void shortFlag(char** argv)
 		case 'h':
 		case '?':
 			showHelp();
+			exit(EXIT_STATUS_NORMAL);
 			break;
 		default:
 			std::cerr << "Flag " << flag << " is not a valid flag" << std::endl;
 			showHelp();
+			exit(EXIT_STATUS_INVALID_FLAG);
 		}
-		++flag;
+		++flag;	// Move to the next character
 	}
 }
 
 void parseArguments(int argc, char **argv)
 {
-	options->programName = argv++[0];
+	options->programName = argv++[0];	// Don't know why I need this but it doesn't hurt?
 	while (argv[0] != NULL)
 	{
 		if (argv[0][0] == '-')
@@ -103,10 +119,11 @@ void parseArguments(int argc, char **argv)
 				shortFlag(argv);
 			}
 		}
-		++argv;
+		++argv;	// Move to the next argument
 	}
 
-	if (!options->fullscreen && options->dimensions == NULL)
+	// If no dimensions are provided set window to fullscreen
+	if (options->dimensions == NULL)
 	{
 		options->fullscreen = true;
 	}
@@ -119,6 +136,7 @@ void parseDimensions(char **argv)
 		std::cerr << "Window dimensions already set to " << options->dimensions->width << "x" << options->dimensions->height << std::endl;
 		return;
 	}
+	// Probably bad way to do it but it's simple and it works?
 	char** next = new char*[1];
 	const char *dims = strtok_s(*argv, "x", next);
 	options->dimensions = new Dimensions;
@@ -128,6 +146,8 @@ void parseDimensions(char **argv)
 
 int main(int argc, char** argv)
 {
+	char infoLog[512];
+
 	parseArguments(argc, argv);
 	glfwSetErrorCallback(errorCallback);
 
@@ -166,6 +186,7 @@ int main(int argc, char** argv)
 	if (!window)
 	{
 		std::cerr << "Failed to create window" << std::endl;
+		exit(EXIT_STATUS_FAILED_WINDOW_CREATION);
 	}
 
 	glfwMakeContextCurrent(window);
@@ -179,11 +200,134 @@ int main(int argc, char** argv)
 		glViewport(0, 0, width, height);
 	}
 
+	float verts[] = {
+		-0.5f, -0.5f, 0.0f,
+		 0.5f, -0.5f, 0.0f,
+		 0.0f,  0.5f, 0.0f
+	};
+
+	// TODO: Maybe organize the code a bit? No? Ok...
+	int fileError;
+	// Read vertex shader
+	FILE *vertexShaderFile = NULL;
+	fileError = fopen_s(&vertexShaderFile, "vertex_shader.glsl", "r");
+	if (fileError)
+	{
+		std::cerr << "Failed to open file " << fileError << std::endl;
+		exit(EXIT_STATUS_FILE_OPEN_ERROR);
+	}
+
+	fseek(vertexShaderFile, 0, SEEK_END);
+	int size = ftell(vertexShaderFile);
+	fseek(vertexShaderFile, 0, SEEK_SET);
+
+	char* vertexShaderSource = new char[size];
+	fread(vertexShaderSource, sizeof(char), size, vertexShaderFile);
+	fclose(vertexShaderFile);
+	if (vertexShaderSource == NULL)
+	{
+		std::cerr << "Could not load vertex shader" << std::endl;
+		exit(EXIT_STATUS_FILE_READ_ERROR);
+	}
+
+	// Create vertex shader program
+	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, &vertexShaderSource, &size);
+	glCompileShader(vertexShader);
+
+	// Get compile info
+	int success;
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetShaderInfoLog(vertexShader, sizeof(infoLog), NULL, infoLog);
+		std::cout << "Failed to compile vertex shader:" << std::endl << infoLog << std::endl;
+		exit(EXIT_STATUS_VERTEX_SHADER_ERROR);
+	}
+
+	// Read fragment shader file
+	FILE *fFragmentShader;
+	fileError = fopen_s(&fFragmentShader, "fragment_shader.glsl", "r");
+	if (fileError)
+	{
+		std::cerr << "Failed to open file: " << fileError << std::endl;
+		exit(EXIT_STATUS_FILE_OPEN_ERROR);
+	}
+
+	fseek(fFragmentShader, 0, SEEK_END);
+	int fragSize = ftell(fFragmentShader);
+	fseek(fFragmentShader, 0, SEEK_SET);
+
+	char* fragmentShaderSource = new char[fragSize];
+	fread(fragmentShaderSource, sizeof(char), fragSize, fFragmentShader);
+	fclose(fFragmentShader);
+	if (fragmentShaderSource == NULL)
+	{
+		std::cerr << "Failed to read fragment shader from file" << std::endl;
+		exit(EXIT_STATUS_FILE_READ_ERROR);
+	}
+
+	// Create and compile fragment shader
+	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragmentShader, 1, &fragmentShaderSource, &fragSize);
+	glCompileShader(fragmentShader);
+
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetShaderInfoLog(fragmentShader, sizeof(infoLog), NULL, infoLog);
+		std::cout << "Failed to compile fragment shader:" << std::endl << infoLog << std::endl;
+		exit(EXIT_STATUS_FRAGMENT_SHADER_ERROR);
+	}
+
+	// Create shader program
+	unsigned int shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	glLinkProgram(shaderProgram);
+
+	// Check for errors
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+	if (!success)
+	{
+		glGetProgramInfoLog(shaderProgram, sizeof(infoLog), NULL, infoLog);
+		std::cerr << "Failed to link shader program:" << std::endl << infoLog << std::endl;
+		exit(EXIT_STATUS_SHADER_PROGRAM_LINK_ERROR);
+	}
+
+	// Cleanup
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+
+	// Create vertex objects
+
+	// Initialize VAO
+	unsigned int vao;
+	glGenVertexArrays(1, &vao);
+
+	// Initialize VBO
+	unsigned int vbo;
+	glGenBuffers(1, &vbo);
+
+	glBindVertexArray(vao);
+
+	// Pass data to vbo
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+
+	// Pass vertex attributes
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
 	while (!glfwWindowShouldClose(window))
 	{
 		double time = glfwGetTime();
-
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		glUseProgram(shaderProgram);
+		glBindVertexArray(vao);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}

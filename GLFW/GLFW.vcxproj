@@ -76,7 +76,20 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\glfw\include;$(SolutionDir)lib\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\glfw\lib;$(SolutionDir)lib\glew\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glfw3dll.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /y $(SolutionDir)lib\glfw\lib\glfw3.dll $(OutputPath);
+copy /y $(SolutionDir)lib\glew\bin\Release\Win32\glew32.dll $(OutputPath);</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy dlls to output directory</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -84,7 +97,20 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\glfw\include;$(SolutionDir)lib\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>glfw3dll.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\glfw\lib;$(SolutionDir)lib\glew\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /y $(SolutionDir)lib\glfw\lib\glfw3.dll $(OutputPath);
+copy /y $(SolutionDir)lib\glew\bin\Release\Win32\glew32.dll $(OutputPath);</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy dlls to output directory</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -115,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

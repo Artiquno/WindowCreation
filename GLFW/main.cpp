@@ -189,6 +189,18 @@ int main(int argc, char** argv)
 		exit(EXIT_STATUS_FAILED_WINDOW_CREATION);
 	}
 
+	// It's transparent for some reason...
+	unsigned char *pixels = new unsigned char[16 * 16 * 4];
+	memset(pixels, 0xff, sizeof(pixels));
+
+	GLFWimage *customCursorImage = new GLFWimage;
+	customCursorImage->height = 16;
+	customCursorImage->width = 16;
+	customCursorImage->pixels = pixels;
+
+	GLFWcursor *cursor = glfwCreateCursor(customCursorImage, 0, 0);
+	glfwSetCursor(window, cursor);
+
 	glfwMakeContextCurrent(window);
 	glewInit();
 

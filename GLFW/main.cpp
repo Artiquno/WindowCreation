@@ -1,8 +1,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
-#include <IL/il.h>
-#include <IL/devil_internal_exports.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 // If only there was a data structure that could
 // make simple mappings from readable name to number...
@@ -89,6 +90,19 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 
 void dropCallback(GLFWwindow *window, int count, const char **paths)
 {
+	int width;
+	int height;
+	int bpp;
+	unsigned char *pixels = stbi_load(paths[0], &width, &height, &bpp, 4);	// There has to be a way for a non-static 4?
+
+	GLFWimage *customCursorImage = new GLFWimage;
+	customCursorImage->height = height;
+	customCursorImage->width = width;
+	customCursorImage->pixels = pixels;
+
+	GLFWcursor *cursor = glfwCreateCursor(customCursorImage, 0, 0);
+	glfwSetCursor(window, cursor);
+
 	for (int i = 0; i < count; ++i)
 	{
 		std::cout << paths[i] << std::endl;
@@ -213,20 +227,6 @@ int main(int argc, char** argv)
 		std::cerr << "Failed to create window" << std::endl;
 		exit(EXIT_STATUS_FAILED_WINDOW_CREATION);
 	}
-
-	// It's transparent for some reason...
-	unsigned char *pixels = new unsigned char[16 * 16 * 4];
-	memset(pixels, 0xff, sizeof(pixels));
-
-	ilLoad(IL_PNG, "image.png");
-
-	GLFWimage *customCursorImage = new GLFWimage;
-	customCursorImage->height = 16;
-	customCursorImage->width = 16;
-	customCursorImage->pixels = pixels;
-
-	GLFWcursor *cursor = glfwCreateCursor(customCursorImage, 0, 0);
-	glfwSetCursor(window, cursor);
 
 	glfwMakeContextCurrent(window);
 	glewInit();

@@ -1,6 +1,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <IL/il.h>
+#include <IL/devil_internal_exports.h>
 
 // If only there was a data structure that could
 // make simple mappings from readable name to number...
@@ -215,6 +217,8 @@ int main(int argc, char** argv)
 	// It's transparent for some reason...
 	unsigned char *pixels = new unsigned char[16 * 16 * 4];
 	memset(pixels, 0xff, sizeof(pixels));
+
+	ilLoad(IL_PNG, "image.png");
 
 	GLFWimage *customCursorImage = new GLFWimage;
 	customCursorImage->height = 16;

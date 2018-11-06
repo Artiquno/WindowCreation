@@ -85,13 +85,18 @@
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+    <PreLinkEvent>
       <Command>copy /y $(SolutionDir)lib\glfw\lib\glfw3.dll $(OutputPath);
 copy /y $(SolutionDir)lib\glew\bin\Release\Win32\glew32.dll $(OutputPath);
 copy /y $(SolutionDir)lib\devil\lib\DevIL.dll $(OutputPath);</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Copy dlls</Message>
-    </PostBuildEvent>
+    </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

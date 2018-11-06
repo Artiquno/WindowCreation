@@ -35,6 +35,9 @@ struct Options
 // Function to call on key input
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
+// On drop callback
+void dropCallback(GLFWwindow *window, int count, const char **paths);
+
 // Function to call when glfw encounters an error
 void errorCallback(int error, const char *description);
 
@@ -64,9 +67,29 @@ void showHelp()
 
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-	if (key == GLFW_KEY_ESCAPE)
+	switch (key)
 	{
+	case GLFW_KEY_ESCAPE:
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
+		break;
+	case GLFW_KEY_V:
+		std::cout << glfwGetClipboardString(window) << std::endl;
+		break;
+	case GLFW_KEY_C:
+		glfwSetClipboardString(window, "Yaaay I'm a clipboard!");
+		break;
+	default:
+		// Do nothing
+		std::cout << key << std::endl;
+		break;
+	}
+}
+
+void dropCallback(GLFWwindow *window, int count, const char **paths)
+{
+	for (int i = 0; i < count; ++i)
+	{
+		std::cout << paths[i] << std::endl;
 	}
 }
 
@@ -205,6 +228,7 @@ int main(int argc, char** argv)
 	glewInit();
 
 	glfwSetKeyCallback(window, keyCallback);
+	glfwSetDropCallback(window, dropCallback);
 
 	{
 		int width, height;

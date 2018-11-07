@@ -48,10 +48,10 @@ void errorCallback(int error, const char *description);
 void parseArguments(int argc, char **argv);
 
 // Parse a long flag
-void longFlag(char **arg);
+void longFlag(char **argv);
 
 // Parse a short flag
-void shortFlag(char **arg);
+void shortFlag(char **argv);
 
 // Apply dimensions to the options
 // Dimensions should be in the form WxH
@@ -114,7 +114,7 @@ void errorCallback(int error, const char *description)
 	std::cerr << "Error: " << description << std::endl;
 }
 
-void longFlag(char** arg)
+void longFlag(char** argv)
 {
 	std::cerr << "Long flags are not yet implemented." << std::endl;
 }

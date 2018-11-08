@@ -260,7 +260,10 @@ int main(int argc, char** argv)
 	}
 	else
 	{
+		// I just love "Always on top"
+		glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
 		window = glfwCreateWindow(options->dimensions->width, options->dimensions->height, "Window", NULL, NULL);
+		//glfwMaximizeWindow(window);
 	}
 	if (!window)
 	{
@@ -303,6 +306,7 @@ int main(int argc, char** argv)
 	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vertexShaderSource, &size);
 	glCompileShader(vertexShader);
+	free(vertexShaderSource);
 
 	// Get compile info
 	int success;
@@ -340,6 +344,7 @@ int main(int argc, char** argv)
 	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource, &fragSize);
 	glCompileShader(fragmentShader);
+	free(fragmentShaderSource);
 
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 	if (!success)
@@ -417,7 +422,7 @@ int main(int argc, char** argv)
 
 	while (!glfwWindowShouldClose(window))
 	{
-		double offset = sin(glfwGetTime()) / 2.0f + 0.5f;
+		float offset = (float)sin(glfwGetTime()) / 2.0f + 0.5f;
 		for (int i = 3; i < sizeof(verts) / sizeof(float); ++i)
 		{
 			if (i % 6 != 0)

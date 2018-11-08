@@ -399,6 +399,8 @@ int main(int argc, char** argv)
 	glGenBuffers(1, &ebo);
 
 	// Use this vao
+	// I think the next two buffers get bound to this vao
+	// I should make sure whether this is what this means
 	glBindVertexArray(vao);
 
 	// Pass data to vbo
@@ -442,6 +444,7 @@ int main(int argc, char** argv)
 		glBindVertexArray(vao);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		// Update vertex data (colors) for the "animation"
 		glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_DYNAMIC_DRAW);
 
 		glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);

@@ -76,23 +76,62 @@ void showHelp()
 	std::cout << "Hi! I'm helping!" << std::endl;
 }
 
+unsigned int currRes = 0;
+int modeCount;
+const GLFWvidmode *modes;
+void changeMode(GLFWwindow *window)
+{
+	currRes = (currRes + 2) % modeCount;
+	GLFWvidmode newMode = modes[currRes];
+
+	// To fullscreen or not to fullscreen?
+	GLFWmonitor *monitor = options->fullscreen ? glfwGetPrimaryMonitor() : NULL;
+	glfwSetWindowMonitor(window, monitor, 100, 100, newMode.width, newMode.height, newMode.refreshRate);
+}
+
+void changeRefreshRate(GLFWwindow *window)
+{
+
+}
+
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-	switch (key)
+	if (action == GLFW_PRESS)	// Only on (probably) key up
 	{
-	case GLFW_KEY_ESCAPE:
-		glfwSetWindowShouldClose(window, GLFW_TRUE);
-		break;
-	case GLFW_KEY_V:
-		std::cout << glfwGetClipboardString(window) << std::endl;
-		break;
-	case GLFW_KEY_C:
-		glfwSetClipboardString(window, "Yaaay I'm a clipboard!");
-		break;
-	default:
-		// Do nothing
-		std::cout << key << std::endl;
-		break;
+		switch (key)
+		{
+		case GLFW_KEY_ESCAPE:
+			glfwSetWindowShouldClose(window, GLFW_TRUE);
+			break;
+		case GLFW_KEY_V:
+			std::cout << glfwGetClipboardString(window) << std::endl;
+			break;
+		case GLFW_KEY_C:
+			glfwSetClipboardString(window, "Yaaay I'm a clipboard!");
+			break;
+		case GLFW_KEY_W:
+			changeMode(window);
+			break;
+		case GLFW_KEY_R:
+			changeRefreshRate(window);
+			break;
+		case GLFW_KEY_H:
+			glfwHideWindow(window);
+			break;
+		case GLFW_KEY_M:
+			if (mods & GLFW_MOD_SHIFT)
+			{
+				glfwMaximizeWindow(window);
+			}
+			else
+			{
+				glfwIconifyWindow(window);
+			}
+		default:
+			// Do nothing
+			std::cout << key << std::endl;
+			break;
+		}
 	}
 }
 
@@ -203,23 +242,16 @@ int main(int argc, char** argv)
 		std::cerr << "Failed to initialize GL context" << std::endl;
 	}
 
-	int count;
 	GLFWmonitor *monitor = glfwGetPrimaryMonitor();
 	const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-	const GLFWvidmode *modes = glfwGetVideoModes(monitor, &count);
+	modes = glfwGetVideoModes(monitor, &modeCount);
 
 	std::cout << "Available sizes:" << std::endl;
-	for (int i = 0; i < count; ++i)
+	for (int i = 0; i < modeCount; ++i)
 	{
-		std::cout << modes[i].width << "x" << modes[i].height << std::endl;
+		std::cout << modes[i].width << "x" << modes[i].height << " " << modes[i].refreshRate << "Hz" << std::endl;
 	}
 	std::cout << std::endl;
-
-	int height;
-	int width;
-	glfwGetMonitorPhysicalSize(monitor, &width, &height);
-
-	std::cout << "Physical size: " << width << "mm x " << height << "mm" << std::endl;
 
 	GLFWwindow *window;
 	if (options->fullscreen)

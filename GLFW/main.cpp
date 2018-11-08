@@ -44,6 +44,9 @@ void dropCallback(GLFWwindow *window, int count, const char **paths);
 // Function to call when glfw encounters an error
 void errorCallback(int error, const char *description);
 
+// Callback for window resizing
+void resizeCallback(GLFWwindow *window, int width, int height);
+
 // Parse command line arguments and apply them
 void parseArguments(int argc, char **argv);
 
@@ -62,6 +65,11 @@ void parseDimensions(char **argv);
 // not even bothering to look at the other
 // parts of the world
 void showHelp();
+
+void resizeCallback(GLFWwindow *window, int width, int height)
+{
+	glViewport(0, 0, width, height);
+}
 
 void showHelp()
 {
@@ -233,12 +241,7 @@ int main(int argc, char** argv)
 
 	glfwSetKeyCallback(window, keyCallback);
 	glfwSetDropCallback(window, dropCallback);
-
-	{
-		int width, height;
-		glfwGetFramebufferSize(window, &width, &height);
-		glViewport(0, 0, width, height);
-	}
+	glfwSetWindowSizeCallback(window, resizeCallback);
 
 	// TODO: Maybe organize the code a bit? No? Ok...
 	int fileError;

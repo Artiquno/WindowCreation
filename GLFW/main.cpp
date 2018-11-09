@@ -468,9 +468,18 @@ int main(int argc, char** argv)
 	// Wireframe!
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+	// Seems to limit it at (roughly) 60fps
+	glfwSwapInterval(1);
+
 	float lastTime = 0;
 	while (!glfwWindowShouldClose(window))
 	{
+		float deltaTime = glfwGetTime() - lastTime;
+		lastTime = glfwGetTime();
+
+		float frameRate = 1.0f / deltaTime;	// Is this accurate?
+		std::cout << frameRate << "fps" << std::endl;
+
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUseProgram(shaderProgram);

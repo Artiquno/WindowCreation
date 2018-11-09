@@ -60,11 +60,40 @@ void shortFlag(char **argv);
 // Dimensions should be in the form WxH
 void parseDimensions(char **argv);
 
+// Load texture for the square
+void loadTexture(const char *path, unsigned int texture);
+
 // Creates a spaceship and sends it to
 // invade the USA ulimately failing and
 // not even bothering to look at the other
 // parts of the world
 void showHelp();
+
+void loadTexture(const char *path, unsigned int texture)
+{
+	// Load texture
+	int width;
+	int height;
+	int nrChannels;
+	unsigned short *texData = stbi_load_16(path, &width, &height, &nrChannels, 0);
+	if (!texData)
+	{
+		std::cerr << "Could not open image " << path << std::endl;
+		return;
+	}
+	
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	// Set parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// Set texture data and create mipmaps
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_SHORT, texData);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	// Texture is free! Master gave pointer to Texture!
+	stbi_image_free(texData);
+}
 
 void resizeCallback(GLFWwindow *window, int width, int height)
 {
@@ -127,6 +156,7 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 			{
 				glfwIconifyWindow(window);
 			}
+			break;
 		default:
 			// Do nothing
 			std::cout << key << std::endl;
@@ -135,20 +165,24 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 	}
 }
 
+unsigned int texture;
 void dropCallback(GLFWwindow *window, int count, const char **paths)
 {
-	int width;
-	int height;
-	int bpp;
-	unsigned char *pixels = stbi_load(paths[0], &width, &height, &bpp, 4);	// There has to be a way for a non-static 4?
+	//int width;
+	//int height;
+	//int bpp;
+	//unsigned char *pixels = stbi_load(paths[0], &width, &height, &bpp, 4);	// There has to be a way for a non-static 4?
 
-	GLFWimage *customCursorImage = new GLFWimage;
-	customCursorImage->height = height;
-	customCursorImage->width = width;
-	customCursorImage->pixels = pixels;
+	//GLFWimage *customCursorImage = new GLFWimage;
+	//customCursorImage->height = height;
+	//customCursorImage->width = width;
+	//customCursorImage->pixels = pixels;
 
-	GLFWcursor *cursor = glfwCreateCursor(customCursorImage, 0, 0);
-	glfwSetCursor(window, cursor);
+	//GLFWcursor *cursor = glfwCreateCursor(customCursorImage, 0, 0);
+	//glfwSetCursor(window, cursor);
+	//stbi_image_free(pixels);
+
+	loadTexture(paths[0], texture);
 
 	for (int i = 0; i < count; ++i)
 	{
@@ -233,7 +267,8 @@ void parseDimensions(char **argv)
 int main(int argc, char** argv)
 {
 	char infoLog[512];
-
+	// All my images were upside down
+	stbi_set_flip_vertically_on_load(1);
 	parseArguments(argc, argv);
 	glfwSetErrorCallback(errorCallback);
 
@@ -260,8 +295,8 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		// I just love "Always on top"
-		glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
+		// I just love it when things are on top
+		//glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
 		window = glfwCreateWindow(options->dimensions->width, options->dimensions->height, "Window", NULL, NULL);
 		//glfwMaximizeWindow(window);
 	}
@@ -375,16 +410,20 @@ int main(int argc, char** argv)
 
 	// Create vertex objects
 	float verts[] = {
-		//     Position         Colors
-		 0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.5f,
-		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.5f,
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 1.0f,
-		-0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f
+		//     Position         Colors        Tex Coords
+		 0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		 0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		-0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f
 	};
 	unsigned int indices[] = {
 		0, 1, 3,
 		1, 2, 3
 	};
+
+	glGenTextures(1, &texture);
+
+	loadTexture("container.jpg", texture);
 
 	// Initialize VAO
 	unsigned int vao;
@@ -412,40 +451,34 @@ int main(int argc, char** argv)
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// Pass vertex attributes
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(sizeof(float) * 3));
+	//int vertCount = sizeof(verts) / 8;
+	int stride = 8 * sizeof(float);
+	// Position
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
 	glEnableVertexAttribArray(0);
+	// Color
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
 	glEnableVertexAttribArray(1);
+	// Tex coords
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 6));
+	glEnableVertexAttribArray(2);
 
 	glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
 
 	// Wireframe!
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+	float lastTime = 0;
 	while (!glfwWindowShouldClose(window))
 	{
-		float offset = (float)sin(glfwGetTime()) / 2.0f + 0.5f;
-		for (int i = 3; i < sizeof(verts) / sizeof(float); ++i)
-		{
-			if (i % 6 != 0)
-			{
-				verts[i] = offset;
-			}
-			// Skip the position data
-			else
-			{
-				i += 2;	// One index is skipped on the loop part
-			}
-		}
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUseProgram(shaderProgram);
 
 		glBindVertexArray(vao);
+		glBindTexture(GL_TEXTURE_2D, texture);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		// Update vertex data (colors) for the "animation"
-		glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_DYNAMIC_DRAW);
 
 		glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);	// Probably when you want to draw more than one object

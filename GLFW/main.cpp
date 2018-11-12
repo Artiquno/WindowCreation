@@ -358,6 +358,19 @@ int main(int argc, char** argv)
 		exit(EXIT_STATUS_FAILED_WINDOW_CREATION);
 	}
 
+	int iconWidth;
+	int iconHeight;
+	int iconBpp;
+	stbi_uc *iconData = stbi_load("container.jpg", &iconWidth, &iconHeight, &iconBpp, 4);
+
+	GLFWimage icon;
+	icon.width = iconWidth;
+	icon.height = iconHeight;
+	icon.pixels = iconData;
+	glfwSetWindowIcon(window, 1, &icon);
+
+	stbi_image_free(iconData);
+
 	glfwMakeContextCurrent(window);
 	glewInit();
 

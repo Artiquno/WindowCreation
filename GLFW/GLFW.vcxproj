@@ -76,7 +76,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\stb;$(SolutionDir)lib\glfw\include;$(SolutionDir)lib\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\stb;$(SolutionDir)lib\glfw\include;$(SolutionDir)lib\glew\include;$(SolutionDir)lib\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions />
     </ClCompile>
     <Link>
@@ -129,7 +129,7 @@ copy /y $(SolutionDir)lib\glew\bin\Release\Win32\glew32.dll $(OutputPath);</Comm
       <ConformanceMode>true</ConformanceMode>
       <PreprocessorDefinitions>
       </PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)lib\stb;$(SolutionDir)lib\glfw\include;$(SolutionDir)lib\glew\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lib\stb;$(SolutionDir)lib\glfw\include;$(SolutionDir)lib\glew\include;$(SolutionDir)lib\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

@@ -92,6 +92,10 @@ void loadTexture(const char *path, unsigned int texture)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	// Default is repeat
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 	// Set texture data and create mipmaps
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_SHORT, texData);
 	glGenerateMipmap(GL_TEXTURE_2D);
@@ -226,6 +230,16 @@ void shortFlag(char** argv)
 		++flag;	// Move to the next character
 	}
 }
+
+struct Mesh
+{
+	float *verts;
+	unsigned int *indices;
+
+	GLuint vao;
+	GLuint vbo;
+	GLuint ebo;
+};
 
 void parseArguments(int argc, char **argv)
 {
@@ -421,8 +435,8 @@ int main(int argc, char** argv)
 		-0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f
 	};
 	unsigned int indices[] = {
-		0, 1, 3,
-		1, 2, 3
+		0, 3, 1,
+		1, 3, 2
 	};
 
 	glGenTextures(1, &texture);
@@ -432,6 +446,47 @@ int main(int argc, char** argv)
 	// Initialize VAO
 	unsigned int vao;
 	glGenVertexArrays(1, &vao);
+
+	// Yes yes, organize, make a class, blah blah
+	float cubeVerts[] = {
+		 0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+	};
+
+	unsigned int cubeIndices[] = {
+		0, 3, 1,
+		1, 3, 2,
+
+		0, 1, 5,
+		0, 5, 4,
+
+		1, 6, 5,
+		1, 2, 6,
+
+		2, 3, 7,
+		2, 7, 6,
+
+		0, 7, 3,
+		0, 4, 7,
+
+		4, 5, 6,
+		4, 6, 7
+	};
+
+	unsigned int cubeVao;
+	glGenVertexArrays(1, &cubeVao);
+
+	unsigned int cubeVbo;
+	glGenBuffers(1, &cubeVbo);
+
+	unsigned int cubeEbo;
+	glGenBuffers(1, &cubeEbo);
 
 	// Initialize VBO
 	unsigned int vbo;
@@ -464,6 +519,24 @@ int main(int argc, char** argv)
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
 	glEnableVertexAttribArray(1);
 	// Tex coords
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 6));
+	glEnableVertexAttribArray(2);
+
+	// Pass the cube data
+	glBindVertexArray(cubeVao);
+
+	glBindBuffer(GL_ARRAY_BUFFER, cubeVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVerts), cubeVerts, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeEbo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
+	glEnableVertexAttribArray(1);
+
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 6));
 	glEnableVertexAttribArray(2);
 
@@ -527,6 +600,21 @@ int main(int argc, char** argv)
 		GLfloat col3[] = { 0.0f, 1.0f, 0.0f };
 		glUniform3fv(colorLoc, 1, col3);
 		glDrawElements(GL_POINTS, sizeof(indices), GL_UNSIGNED_INT, 0);
+
+		//glBindVertexArray(0);	// Probably when you want to draw more than one object
+
+		glBindVertexArray(cubeVao);
+
+		glm::mat4 transCube;
+		transCube = glm::scale(transCube, glm::vec3(0.3f, 0.3f, 0.3f));
+		transCube = glm::rotate(transCube, (float)DEG2RAD(45), glm::vec3(1.0f, 0.0f, 0.0f));
+		transCube = glm::rotate(transCube, (float)glfwGetTime(), glm::normalize(glm::vec3(2.0f, 1.0f, 0.5f)));
+
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transCube));
+		GLfloat cubeCol[] = { 0.0f, 1.0f, 1.0f };
+		glUniform3fv(colorLoc, 1, cubeCol);
+
+		glDrawElements(GL_TRIANGLES, sizeof(cubeIndices), GL_UNSIGNED_INT, 0);
 
 		glBindVertexArray(0);	// Probably when you want to draw more than one object
 

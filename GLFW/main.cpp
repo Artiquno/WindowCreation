@@ -25,6 +25,7 @@
 #define EXIT_STATUS_FILE_OPEN_ERROR 7
 
 glm::mat4 view;
+glm::mat4 projection;
 
 struct Dimensions
 {
@@ -107,6 +108,11 @@ void loadTexture(const char *path, unsigned int texture)
 
 void resizeCallback(GLFWwindow *window, int width, int height)
 {
+	options->dimensions->width = width;
+	options->dimensions->height = height;
+
+	projection = glm::perspective(45.0f, options->dimensions->width / (float)options->dimensions->height, 0.1f, 100.0f);
+
 	glViewport(0, 0, width, height);
 }
 
@@ -610,8 +616,6 @@ int main(int argc, char** argv)
 	// The best way to move a spaceship is
 	// by moving the whole universe around it instead
 	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-
-	glm::mat4 projection;
 	projection = glm::perspective(45.0f, (float)options->dimensions->width / (float)options->dimensions->height, 0.1f, 100.0f);
 
 	glfwSetTime(0.0);

@@ -2,6 +2,10 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -444,7 +448,7 @@ int main(int argc, char** argv)
 
 	// Pass data to vbo
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
 
 	// Pass data to ebo
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
@@ -471,11 +475,27 @@ int main(int argc, char** argv)
 	// Seems to limit it at (roughly) 60fps
 	glfwSwapInterval(1);
 
+	GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
+	GLint colorLoc = glGetUniformLocation(shaderProgram, "color");
+
+	glEnable(GL_PROGRAM_POINT_SIZE);
+	glEnable(GL_CULL_FACE);
+
+	glfwSetTime(0.0);
 	float lastTime = 0;
 	while (!glfwWindowShouldClose(window))
 	{
 		float deltaTime = glfwGetTime() - lastTime;
 		lastTime = glfwGetTime();
+
+		glm::mat4 transform;
+		transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.0f));
+		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+		GLfloat col[] = { 1.0f, 1.0f, 1.0f };
+		glUniform3fv(colorLoc, 1, col);
 
 		float frameRate = 1.0f / deltaTime;	// Is this accurate?
 		std::cout << frameRate << "fps" << std::endl;
@@ -490,6 +510,24 @@ int main(int argc, char** argv)
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
 		glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
+
+#define PI 3.14159265358979323846264
+#define DEG2RAD(x) (x*PI)/180
+
+		glm::mat4 trans;
+		trans = glm::rotate(trans, (float)((glfwGetTime() * 1) + DEG2RAD(0)), glm::vec3(0.0f, 0.0f, 1.0f));
+		trans = glm::translate(trans, glm::vec3(0.0f, 0.75f, 0.0f));
+		trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.5f));
+		//trans = glm::translate(trans, glm::vec3(sin(glfwGetTime()) / 0.75f, 0.0f, 0.0f));
+		GLfloat col2[] = { 1.0f, 0.0f, 0.0f };
+		glUniform3fv(colorLoc, 1, col2);
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+		glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
+
+		GLfloat col3[] = { 0.0f, 1.0f, 0.0f };
+		glUniform3fv(colorLoc, 1, col3);
+		glDrawElements(GL_POINTS, sizeof(indices), GL_UNSIGNED_INT, 0);
+
 		glBindVertexArray(0);	// Probably when you want to draw more than one object
 
 		glfwSwapBuffers(window);

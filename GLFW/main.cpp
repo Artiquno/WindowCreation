@@ -108,6 +108,12 @@ void loadTexture(const char *path, unsigned int texture)
 
 void resizeCallback(GLFWwindow *window, int width, int height)
 {
+	// Otherwise we get 0/0 for the perspective ratio
+	// Or 0/height but i don't want a 0 width window...
+	if (!(width && height))
+	{
+		return;
+	}
 	options->dimensions->width = width;
 	options->dimensions->height = height;
 
@@ -363,6 +369,7 @@ int main(int argc, char** argv)
 	GLFWwindow *window;
 	if (options->fullscreen)
 	{
+		options->dimensions = new Dimensions;
 		options->dimensions->width = mode->width;
 		options->dimensions->height = mode->height;
 		window = glfwCreateWindow(mode->width, mode->height, "Window", monitor, NULL);
@@ -641,6 +648,9 @@ int main(int argc, char** argv)
 		float deltaTime = glfwGetTime() - lastTime;
 		lastTime = glfwGetTime();
 
+		float frameRate = 1.0f / deltaTime;	// Is this accurate?
+		//std::cout << frameRate << "fps" << std::endl;
+
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
@@ -653,9 +663,6 @@ int main(int argc, char** argv)
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
 		GLfloat col[] = { 1.0f, 1.0f, 1.0f };
 		glUniform3fv(colorLoc, 1, col);
-
-		float frameRate = 1.0f / deltaTime;	// Is this accurate?
-		std::cout << frameRate << "fps" << std::endl;
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

@@ -24,6 +24,8 @@
 #define EXIT_STATUS_FILE_READ_ERROR 6
 #define EXIT_STATUS_FILE_OPEN_ERROR 7
 
+glm::mat4 view;
+
 struct Dimensions
 {
 	int width = 0;
@@ -133,6 +135,36 @@ void changeRefreshRate(GLFWwindow *window)
 
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
+	if (action == GLFW_PRESS || action == GLFW_REPEAT)
+	{
+		if (key == GLFW_KEY_A)
+		{
+			view = glm::translate(view, glm::vec3(0.1f, 0.0f, 0.0f));
+		}
+		else if (key == GLFW_KEY_D)
+		{
+			view = glm::translate(view, glm::vec3(-0.1f, 0.0f, 0.0f));
+		}
+
+		if (key == GLFW_KEY_W)
+		{
+			view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.1f));
+		}
+		else if (key == GLFW_KEY_S)
+		{
+			view = glm::translate(view, glm::vec3(0.0f, 0.0f, -0.1f));
+		}
+
+		if (key == GLFW_KEY_E)
+		{
+			view = glm::translate(view, glm::vec3(0.0f, -0.1f, 0.0f));
+		}
+		else if (key == GLFW_KEY_Q)
+		{
+			view = glm::translate(view, glm::vec3(0.0f, 0.1f, 0.0f));
+		}
+	}
+
 	if (action == GLFW_PRESS)	// Only on (probably) key up
 	{
 		switch (key)
@@ -146,9 +178,9 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 		case GLFW_KEY_C:
 			glfwSetClipboardString(window, "Yaaay I'm a clipboard!");
 			break;
-		case GLFW_KEY_W:
+		/*case GLFW_KEY_W:
 			changeMode(window);
-			break;
+			break;*/
 		case GLFW_KEY_R:
 			changeRefreshRate(window);
 			break;
@@ -309,6 +341,8 @@ int main(int argc, char** argv)
 	GLFWwindow *window;
 	if (options->fullscreen)
 	{
+		options->dimensions->width = mode->width;
+		options->dimensions->height = mode->height;
 		window = glfwCreateWindow(mode->width, mode->height, "Window", monitor, NULL);
 	}
 	else
@@ -549,11 +583,23 @@ int main(int argc, char** argv)
 	// Seems to limit it at (roughly) 60fps
 	glfwSwapInterval(1);
 
-	GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
 	GLint colorLoc = glGetUniformLocation(shaderProgram, "color");
 
+	GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
+	GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
+	GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+
 	glEnable(GL_PROGRAM_POINT_SIZE);
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+
+	// Moving the camera 3.0f towards +Z
+	// The best way to move a spaceship is
+	// by moving the whole universe around it instead
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+	glm::mat4 projection;
+	projection = glm::perspective(45.0f, (float)options->dimensions->width / (float)options->dimensions->height, 0.1f, 100.0f);
 
 	glfwSetTime(0.0);
 	float lastTime = 0;
@@ -562,19 +608,23 @@ int main(int argc, char** argv)
 		float deltaTime = glfwGetTime() - lastTime;
 		lastTime = glfwGetTime();
 
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
 		glm::mat4 transform;
 		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-		transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.0f));
+		transform = glm::rotate(transform, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.0f));
 
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
 		GLfloat col[] = { 1.0f, 1.0f, 1.0f };
 		glUniform3fv(colorLoc, 1, col);
 
 		float frameRate = 1.0f / deltaTime;	// Is this accurate?
 		std::cout << frameRate << "fps" << std::endl;
 
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glUseProgram(shaderProgram);
 
@@ -585,17 +635,14 @@ int main(int argc, char** argv)
 
 		glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
 
-#define PI 3.14159265358979323846264
-#define DEG2RAD(x) (x*PI)/180
-
 		glm::mat4 trans;
 		trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
-		trans = glm::rotate(trans, -(float)((glfwGetTime() * 1) + DEG2RAD(0)), glm::vec3(0.0f, 0.0f, 1.0f));
+		trans = glm::rotate(trans, -(float)((glfwGetTime() * 1) + glm::radians(0.0)), glm::vec3(0.0f, 0.0f, 1.0f));
 		trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 1.0f));
 		//trans = glm::translate(trans, glm::vec3(sin(glfwGetTime()) / 0.75f, 0.0f, 0.0f));
 		GLfloat col2[] = { 1.0f, 0.0f, 0.0f };
 		glUniform3fv(colorLoc, 1, col2);
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(trans));
 		glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
 
 		GLfloat col3[] = { 0.0f, 1.0f, 0.0f };
@@ -609,10 +656,10 @@ int main(int argc, char** argv)
 		glm::mat4 transCube;
 		transCube = glm::translate(transCube, glm::vec3(-0.5f, -0.5f, 0.0f));
 		transCube = glm::scale(transCube, glm::vec3(0.5f, 0.5f, 0.5f));
-		transCube = glm::rotate(transCube, (float)DEG2RAD(45), glm::vec3(1.0f, 0.0f, 0.0f));
+		transCube = glm::rotate(transCube, glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		transCube = glm::rotate(transCube, (float)glfwGetTime(), glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)));
 
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transCube));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transCube));
 		GLfloat cubeCol[] = { 0.0f, 1.0f, 1.0f };
 		glUniform3fv(colorLoc, 1, cubeCol);
 

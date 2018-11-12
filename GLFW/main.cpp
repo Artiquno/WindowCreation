@@ -203,9 +203,25 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 				glfwIconifyWindow(window);
 			}
 			break;
+		case GLFW_KEY_W:
+		case GLFW_KEY_A:
+		case GLFW_KEY_S:
+		case GLFW_KEY_D:
+		case GLFW_KEY_E:
+		case GLFW_KEY_Q:
+			break;
 		default:
-			// Do nothing
-			std::cout << key << std::endl;
+			const char *key_name = glfwGetKeyName(key, scancode);
+			std::cout << key << ": ";
+			if (key_name)
+			{
+				std::cout << key_name;
+			}
+			else
+			{
+				std::cout << scancode;
+			}
+			std::cout << std::endl;
 			break;
 		}
 	}

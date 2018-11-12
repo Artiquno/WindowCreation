@@ -448,6 +448,7 @@ int main(int argc, char** argv)
 	glGenVertexArrays(1, &vao);
 
 	// Yes yes, organize, make a class, blah blah
+	// ToDo: Find a way to set UV for each face
 	float cubeVerts[] = {
 		 0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
 		 0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
@@ -562,9 +563,9 @@ int main(int argc, char** argv)
 		lastTime = glfwGetTime();
 
 		glm::mat4 transform;
+		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
 		transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.0f));
 		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
 
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 		GLfloat col[] = { 1.0f, 1.0f, 1.0f };
@@ -588,9 +589,9 @@ int main(int argc, char** argv)
 #define DEG2RAD(x) (x*PI)/180
 
 		glm::mat4 trans;
-		trans = glm::rotate(trans, (float)((glfwGetTime() * 1) + DEG2RAD(0)), glm::vec3(0.0f, 0.0f, 1.0f));
-		trans = glm::translate(trans, glm::vec3(0.0f, 0.75f, 0.0f));
-		trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 0.5f));
+		trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
+		trans = glm::rotate(trans, -(float)((glfwGetTime() * 1) + DEG2RAD(0)), glm::vec3(0.0f, 0.0f, 1.0f));
+		trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 1.0f));
 		//trans = glm::translate(trans, glm::vec3(sin(glfwGetTime()) / 0.75f, 0.0f, 0.0f));
 		GLfloat col2[] = { 1.0f, 0.0f, 0.0f };
 		glUniform3fv(colorLoc, 1, col2);
@@ -606,9 +607,10 @@ int main(int argc, char** argv)
 		glBindVertexArray(cubeVao);
 
 		glm::mat4 transCube;
-		transCube = glm::scale(transCube, glm::vec3(0.3f, 0.3f, 0.3f));
+		transCube = glm::translate(transCube, glm::vec3(-0.5f, -0.5f, 0.0f));
+		transCube = glm::scale(transCube, glm::vec3(0.5f, 0.5f, 0.5f));
 		transCube = glm::rotate(transCube, (float)DEG2RAD(45), glm::vec3(1.0f, 0.0f, 0.0f));
-		transCube = glm::rotate(transCube, (float)glfwGetTime(), glm::normalize(glm::vec3(2.0f, 1.0f, 0.5f)));
+		transCube = glm::rotate(transCube, (float)glfwGetTime(), glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)));
 
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transCube));
 		GLfloat cubeCol[] = { 0.0f, 1.0f, 1.0f };

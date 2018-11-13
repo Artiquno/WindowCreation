@@ -14,7 +14,7 @@ namespace Window
 		std::cout << description << std::endl;
 	}
 
-	Window::Window(std::string name, int width, int height, bool isFullscreen) :
+	Window::Window(std::string name, bool isFullscreen, int width, int height) :
 		name(name), isFullscreen(isFullscreen)
 	{
 		screen = new Screen();

@@ -136,36 +136,6 @@ void changeRefreshRate(GLFWwindow *window)
 
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-	if (action == GLFW_PRESS || action == GLFW_REPEAT)
-	{
-		if (key == GLFW_KEY_A)
-		{
-			view = glm::translate(view, glm::vec3(0.1f, 0.0f, 0.0f));
-		}
-		else if (key == GLFW_KEY_D)
-		{
-			view = glm::translate(view, glm::vec3(-0.1f, 0.0f, 0.0f));
-		}
-
-		if (key == GLFW_KEY_W)
-		{
-			view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.1f));
-		}
-		else if (key == GLFW_KEY_S)
-		{
-			view = glm::translate(view, glm::vec3(0.0f, 0.0f, -0.1f));
-		}
-
-		if (key == GLFW_KEY_E)
-		{
-			view = glm::translate(view, glm::vec3(0.0f, -0.1f, 0.0f));
-		}
-		else if (key == GLFW_KEY_Q)
-		{
-			view = glm::translate(view, glm::vec3(0.0f, 0.1f, 0.0f));
-		}
-	}
-
 	if (action == GLFW_PRESS)	// Only on (probably) key up
 	{
 		switch (key)
@@ -339,7 +309,12 @@ int main(int argc, char** argv)
 	parseArguments(argc, argv);
 
 	Window::Window windowClass("Window");
+	windowClass.getInputManager()->registerKeyCallback(keyCallback);
 	GLFWwindow *window = windowClass.getWindow();
+
+	// ToDo: Allow more than one handler on the user pointer
+	// Create a manager containing all other managers and use that?
+	//glfwSetWindowUserPointer(window, NULL);
 
 	glewInit();
 

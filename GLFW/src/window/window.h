@@ -32,10 +32,11 @@ namespace Window
 		InputManager inputManager;
 
 	public:
-		Window(std::string name, int width = 640, int height = 480, bool isFullscreen = false);
+		Window(std::string name, bool isFullscreen = false, int width = 640, int height = 480);
 		static void glfwErrorCallback(int error, const char *description);
 
 		GLFWwindow *const getWindow() const { return window; }
+		InputManager * getInputManager() { return &inputManager; }
 	private:
 		void init();
 	};

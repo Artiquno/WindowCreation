@@ -3,6 +3,7 @@
 
 #include "src/definitions.h"
 #include "src/window/window.h"
+#include "src/utils/command_parser.h"
 
 #include <iostream>
 
@@ -16,54 +17,21 @@
 glm::mat4 view;
 glm::mat4 projection;
 
-struct Dimensions
-{
-	int width = 0;
-	int height = 0;
-};
-
-// Command line argument options
-struct Options
-{
-	char *programName;					// Duh
-	bool fullscreen = false;			// Create window in fullscreen mode?
-	Dimensions *dimensions = NULL;		// Window dimensions (if not fullscreen)
-	bool showHelp = false;				// Print help and exit
-} *options = new Options;
+Utils::CommandParser parser;
 
 // Function to call on key input
+// Moved to InputManager but i'm leaving this here
+// to prove a point NYEH HEH HEH HEH!
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
 // On drop callback
 void dropCallback(GLFWwindow *window, int count, const char **paths);
 
-// Function to call when glfw encounters an error
-void errorCallback(int error, const char *description);
-
 // Callback for window resizing
 void resizeCallback(GLFWwindow *window, int width, int height);
 
-// Parse command line arguments and apply them
-void parseArguments(int argc, char **argv);
-
-// Parse a long flag
-void longFlag(char **argv);
-
-// Parse a short flag
-void shortFlag(char **argv);
-
-// Apply dimensions to the options
-// Dimensions should be in the form WxH
-void parseDimensions(char **argv);
-
 // Load texture for the square
 void loadTexture(const char *path, unsigned int texture);
-
-// Creates a spaceship and sends it to
-// invade the USA ulimately failing and
-// not even bothering to look at the other
-// parts of the world
-void showHelp();
 
 void loadTexture(const char *path, unsigned int texture)
 {
@@ -103,17 +71,13 @@ void resizeCallback(GLFWwindow *window, int width, int height)
 	{
 		return;
 	}
-	options->dimensions->width = width;
-	options->dimensions->height = height;
+	Utils::CommandParser::Options options = parser.getOptions();
+	options.dimensions->width = width;
+	options.dimensions->height = height;
 
-	projection = glm::perspective(45.0f, options->dimensions->width / (float)options->dimensions->height, 0.1f, 100.0f);
+	projection = glm::perspective(45.0f, options.dimensions->width / (float)options.dimensions->height, 0.1f, 100.0f);
 
 	glViewport(0, 0, width, height);
-}
-
-void showHelp()
-{
-	std::cout << "Hi! I'm helping!" << std::endl;
 }
 
 unsigned int currRes = 0;
@@ -125,7 +89,7 @@ void changeMode(GLFWwindow *window)
 	GLFWvidmode newMode = modes[currRes];
 
 	// To fullscreen or not to fullscreen?
-	GLFWmonitor *monitor = options->fullscreen ? glfwGetPrimaryMonitor() : NULL;
+	GLFWmonitor *monitor = Utils::CommandParser::getOptions().fullscreen ? glfwGetPrimaryMonitor() : NULL;
 	glfwSetWindowMonitor(window, monitor, 100, 100, newMode.width, newMode.height, newMode.refreshRate);
 }
 
@@ -217,39 +181,6 @@ void dropCallback(GLFWwindow *window, int count, const char **paths)
 	}
 }
 
-void errorCallback(int error, const char *description)
-{
-	std::cerr << "Error: " << description << std::endl;
-}
-
-void longFlag(char** argv)
-{
-	std::cerr << "Long flags are not yet implemented." << std::endl;
-}
-void shortFlag(char** argv)
-{
-	char *flag = &(*argv)[1];
-	while (*flag != '\0')
-	{
-		switch (*flag)
-		{
-		case 'f':	options->fullscreen = true; break;
-		// Assumes the next argument is the dimensions
-		case 'd':	parseDimensions(++argv); break;
-		case 'h':
-		case '?':
-			showHelp();
-			exit(ExitStatus::Normal);
-			break;
-		default:
-			std::cerr << "Flag " << flag << " is not a valid flag" << std::endl;
-			showHelp();
-			exit(ExitStatus::InvalidFlag);
-		}
-		++flag;	// Move to the next character
-	}
-}
-
 struct Mesh
 {
 	float *verts;
@@ -260,55 +191,16 @@ struct Mesh
 	GLuint ebo;
 };
 
-void parseArguments(int argc, char **argv)
-{
-	options->programName = argv++[0];	// Don't know why I need this but it doesn't hurt?
-	while (argv[0] != NULL)
-	{
-		if (argv[0][0] == '-')
-		{
-			if (argv[0][1] == '-')
-			{
-				longFlag(argv);
-			}
-			else
-			{
-				shortFlag(argv);
-			}
-		}
-		++argv;	// Move to the next argument
-	}
-
-	// If no dimensions are provided set window to fullscreen
-	if (options->dimensions == NULL)
-	{
-		options->fullscreen = true;
-	}
-}
-
-void parseDimensions(char **argv)
-{
-	if (options->dimensions != NULL)
-	{
-		std::cerr << "Window dimensions already set to " << options->dimensions->width << "x" << options->dimensions->height << std::endl;
-		return;
-	}
-	// Probably bad way to do it but it's simple and it works?
-	char** next = new char*[1];
-	const char *dims = strtok_s(*argv, "x", next);
-	options->dimensions = new Dimensions;
-	options->dimensions->width = (int)strtol(dims, NULL, 10);
-	options->dimensions->height = (int)strtol(*next, NULL, 10);
-}
-
 int main(int argc, char** argv)
 {
 	char infoLog[512];
 	// All my images were upside down
 	stbi_set_flip_vertically_on_load(1);
-	parseArguments(argc, argv);
 
-	Window::Window windowClass("Window");
+	parser.parse(argc, argv);
+	Utils::CommandParser::Options options = parser.getOptions();
+
+	Window::Window windowClass("Window", false, options.dimensions->width, options.dimensions->height);
 	windowClass.getInputManager()->registerKeyCallback(keyCallback);
 	GLFWwindow *window = windowClass.getWindow();
 
@@ -551,7 +443,7 @@ int main(int argc, char** argv)
 	// The best way to move a spaceship is
 	// by moving the whole universe around it instead
 	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-	projection = glm::perspective(45.0f, (float)options->dimensions->width / (float)options->dimensions->height, 0.1f, 100.0f);
+	projection = glm::perspective(45.0f, (float)options.dimensions->width / (float)options.dimensions->height, 0.1f, 100.0f);
 
 	glfwSetTime(0.0);
 	float lastTime = 0;

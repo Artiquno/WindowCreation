@@ -3,6 +3,7 @@
 #define WINDOW_H
 
 #include <string>
+#include <GL/glew.h>
 #include <glfw/glfw3.h>
 
 #include "input_manager.h"

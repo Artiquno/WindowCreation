@@ -316,8 +316,6 @@ int main(int argc, char** argv)
 	// Create a manager containing all other managers and use that?
 	//glfwSetWindowUserPointer(window, NULL);
 
-	glewInit();
-
 	glfwSetDropCallback(window, dropCallback);
 	glfwSetWindowSizeCallback(window, resizeCallback);
 

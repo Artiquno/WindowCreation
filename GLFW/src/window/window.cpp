@@ -87,6 +87,7 @@ namespace Window
 		}
 
 		glfwMakeContextCurrent(window);
+		glewInit();
 
 		glfwSetWindowUserPointer(window, &inputManager);
 		glfwSetKeyCallback(window, InputManager::processKeyInput);

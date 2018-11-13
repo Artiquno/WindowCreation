@@ -1,5 +1,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
+#include "src/definitions.h"
+#include "src/window/window.h"
+
 #include <iostream>
 
 #include <glm/glm.hpp>
@@ -8,21 +12,6 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-
-// If only there was a data structure that could
-// make simple mappings from readable name to number...
-#define EXIT_STATUS_NORMAL 0
-
-#define EXIT_STATUS_INVALID_FLAG 1
-
-#define EXIT_STATUS_VERTEX_SHADER_ERROR 2
-#define EXIT_STATUS_FRAGMENT_SHADER_ERROR 3
-#define EXIT_STATUS_SHADER_PROGRAM_LINK_ERROR 4
-
-#define EXIT_STATUS_FAILED_WINDOW_CREATION 5
-
-#define EXIT_STATUS_FILE_READ_ERROR 6
-#define EXIT_STATUS_FILE_OPEN_ERROR 7
 
 glm::mat4 view;
 glm::mat4 projection;
@@ -280,12 +269,12 @@ void shortFlag(char** argv)
 		case 'h':
 		case '?':
 			showHelp();
-			exit(EXIT_STATUS_NORMAL);
+			exit(ExitStatus::Normal);
 			break;
 		default:
 			std::cerr << "Flag " << flag << " is not a valid flag" << std::endl;
 			showHelp();
-			exit(EXIT_STATUS_INVALID_FLAG);
+			exit(ExitStatus::InvalidFlag);
 		}
 		++flag;	// Move to the next character
 	}
@@ -348,62 +337,12 @@ int main(int argc, char** argv)
 	// All my images were upside down
 	stbi_set_flip_vertically_on_load(1);
 	parseArguments(argc, argv);
-	glfwSetErrorCallback(errorCallback);
 
-	if (!glfwInit())
-	{
-		std::cerr << "Failed to initialize GL context" << std::endl;
-	}
+	Window::Window windowClass("Window");
+	GLFWwindow *window = windowClass.getWindow();
 
-	GLFWmonitor *monitor = glfwGetPrimaryMonitor();
-	const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-	modes = glfwGetVideoModes(monitor, &modeCount);
-
-	std::cout << "Available sizes:" << std::endl;
-	for (int i = 0; i < modeCount; ++i)
-	{
-		std::cout << modes[i].width << "x" << modes[i].height << " " << modes[i].refreshRate << "Hz" << std::endl;
-	}
-	std::cout << std::endl;
-
-	GLFWwindow *window;
-	if (options->fullscreen)
-	{
-		options->dimensions = new Dimensions;
-		options->dimensions->width = mode->width;
-		options->dimensions->height = mode->height;
-		window = glfwCreateWindow(mode->width, mode->height, "Window", monitor, NULL);
-	}
-	else
-	{
-		// I just love it when things are on top
-		//glfwWindowHint(GLFW_FLOATING, GLFW_TRUE);
-		window = glfwCreateWindow(options->dimensions->width, options->dimensions->height, "Window", NULL, NULL);
-		//glfwMaximizeWindow(window);
-	}
-	if (!window)
-	{
-		std::cerr << "Failed to create window" << std::endl;
-		exit(EXIT_STATUS_FAILED_WINDOW_CREATION);
-	}
-
-	int iconWidth;
-	int iconHeight;
-	int iconBpp;
-	stbi_uc *iconData = stbi_load("container.jpg", &iconWidth, &iconHeight, &iconBpp, 4);
-
-	GLFWimage icon;
-	icon.width = iconWidth;
-	icon.height = iconHeight;
-	icon.pixels = iconData;
-	glfwSetWindowIcon(window, 1, &icon);
-
-	stbi_image_free(iconData);
-
-	glfwMakeContextCurrent(window);
 	glewInit();
 
-	glfwSetKeyCallback(window, keyCallback);
 	glfwSetDropCallback(window, dropCallback);
 	glfwSetWindowSizeCallback(window, resizeCallback);
 
@@ -411,11 +350,11 @@ int main(int argc, char** argv)
 	int fileError;
 	// Read vertex shader
 	FILE *vertexShaderFile = NULL;
-	fileError = fopen_s(&vertexShaderFile, "vertex_shader.glsl", "r");
+	fileError = fopen_s(&vertexShaderFile, "shaders/vertex_shader.glsl", "r");
 	if (fileError)
 	{
 		std::cerr << "Failed to open file " << fileError << std::endl;
-		exit(EXIT_STATUS_FILE_OPEN_ERROR);
+		exit(ExitStatus::FileOpenError);
 	}
 
 	fseek(vertexShaderFile, 0, SEEK_END);
@@ -428,7 +367,7 @@ int main(int argc, char** argv)
 	if (vertexShaderSource == NULL)
 	{
 		std::cerr << "Could not load vertex shader" << std::endl;
-		exit(EXIT_STATUS_FILE_READ_ERROR);
+		exit(ExitStatus::FileReadError);
 	}
 
 	// Create vertex shader program
@@ -444,16 +383,16 @@ int main(int argc, char** argv)
 	{
 		glGetShaderInfoLog(vertexShader, sizeof(infoLog), NULL, infoLog);
 		std::cout << "Failed to compile vertex shader:" << std::endl << infoLog << std::endl;
-		exit(EXIT_STATUS_VERTEX_SHADER_ERROR);
+		exit(ExitStatus::VertexShaderError);
 	}
 
 	// Read fragment shader file
 	FILE *fFragmentShader;
-	fileError = fopen_s(&fFragmentShader, "fragment_shader.glsl", "r");
+	fileError = fopen_s(&fFragmentShader, "shaders/fragment_shader.glsl", "r");
 	if (fileError)
 	{
 		std::cerr << "Failed to open file: " << fileError << std::endl;
-		exit(EXIT_STATUS_FILE_OPEN_ERROR);
+		exit(ExitStatus::FileOpenError);
 	}
 
 	fseek(fFragmentShader, 0, SEEK_END);
@@ -466,7 +405,7 @@ int main(int argc, char** argv)
 	if (fragmentShaderSource == NULL)
 	{
 		std::cerr << "Failed to read fragment shader from file" << std::endl;
-		exit(EXIT_STATUS_FILE_READ_ERROR);
+		exit(ExitStatus::FileReadError);
 	}
 
 	// Create and compile fragment shader
@@ -480,7 +419,7 @@ int main(int argc, char** argv)
 	{
 		glGetShaderInfoLog(fragmentShader, sizeof(infoLog), NULL, infoLog);
 		std::cout << "Failed to compile fragment shader:" << std::endl << infoLog << std::endl;
-		exit(EXIT_STATUS_FRAGMENT_SHADER_ERROR);
+		exit(ExitStatus::FragmentShaderError);
 	}
 
 	// Create shader program
@@ -495,7 +434,7 @@ int main(int argc, char** argv)
 	{
 		glGetProgramInfoLog(shaderProgram, sizeof(infoLog), NULL, infoLog);
 		std::cerr << "Failed to link shader program:" << std::endl << infoLog << std::endl;
-		exit(EXIT_STATUS_SHADER_PROGRAM_LINK_ERROR);
+		exit(ExitStatus::ShaderProgramLinkError);
 	}
 
 	// Cleanup
@@ -655,7 +594,7 @@ int main(int argc, char** argv)
 		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 		glm::mat4 transform;
-		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, -1.0f));
 		transform = glm::rotate(transform, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 		transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.0f));

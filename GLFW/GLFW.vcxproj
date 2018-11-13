@@ -169,11 +169,20 @@ copy /y $(SolutionDir)lib\glew\bin\Release\Win32\glew32.dll $(OutputPath);</Comm
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\camera\camera.cpp" />
+    <ClCompile Include="src\window\input_manager.cpp" />
+    <ClCompile Include="src\window\window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="fragment_shader.glsl" />
     <None Include="README.md" />
-    <None Include="vertex_shader.glsl" />
+    <None Include="shaders\fragment_shader.glsl" />
+    <None Include="shaders\vertex_shader.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="definitions.h" />
+    <ClInclude Include="src\camera\camera.h" />
+    <ClInclude Include="src\window\input_manager.h" />
+    <ClInclude Include="src\window\window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -8,7 +8,7 @@ Most of the code is based off of [these tutorials](https://learnopengl.com/)
 ### Libraries
 [GLFW](http://www.glfw.org/) for window and context creation, input handling, and probably other things.  
 [GL Math](https://glm.g-truc.net/0.9.9/index.html) for matrix manipulation  
-[stb_image](https://github.com/nothings/stb) for image loading  
+[stb_image](https://github.com/nothings/stb) for image loading. Will probably change it to use FreeImage instead, I'm not completely sure how to use stbi... And probably better to have a C++ library anyway  
 [GLEW](http://glew.sourceforge.net/) ... honestly i have no idea...  
 
 --------------------------------

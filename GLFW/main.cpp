@@ -333,25 +333,12 @@ int main(int argc, char** argv)
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 6));
 	glEnableVertexAttribArray(2);
 
-	glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
-
-	// Wireframe!
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-	// Seems to limit it at (roughly) 60fps
-	glfwSwapInterval(1);
-
-	glEnable(GL_PROGRAM_POINT_SIZE);
-	//glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-
 	// Moving the camera 3.0f towards +Z
 	// The best way to move a spaceship is
 	// by moving the whole universe around it instead
 	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 	projection = glm::perspective(45.0f, (float)options.dimensions->width / (float)options.dimensions->height, 0.1f, 100.0f);
 
-	glfwSetTime(0.0);
 	float lastTime = 0;
 	while (!glfwWindowShouldClose(window))
 	{

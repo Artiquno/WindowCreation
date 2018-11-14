@@ -6,6 +6,7 @@
 #include <stb_image.h>
 
 #include "../definitions.h"
+#include "../utils/image.h"
 
 namespace Window
 {
@@ -69,28 +70,41 @@ namespace Window
 
 		// Set icon
 		{
-			GLFWimage icon;
+			const char *path = "container.jpg";	// Temp
+			Utils::Image image(path, 4);
 
-			int iconBpp;
-			const char *path = "container.jpg";
-			icon.pixels = stbi_load(path, &icon.width, &icon.height, &iconBpp, 4);
-
-			if (!icon.pixels)
+			if(image.isLoaded())
 			{
-				std::cerr << "Could not load " << path << std::endl;
-			}
-			else
-			{
+				GLFWimage icon;
+				icon.height = image.getHeight();
+				icon.width = image.getWidth();
+				icon.pixels = image.getPixels();
 				glfwSetWindowIcon(window, 1, &icon);
-				stbi_image_free(icon.pixels);
 			}
 		}
 
+		// Bind to OpenGl
 		glfwMakeContextCurrent(window);
 		glewInit();
 
 		glfwSetWindowUserPointer(window, &inputManager);
 		glfwSetKeyCallback(window, InputManager::processKeyInput);
 		glViewport(0, 0, screen->width, screen->height);
+
+		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
+
+		// Wireframe!
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+		glEnable(GL_PROGRAM_POINT_SIZE);
+		//glEnable(GL_CULL_FACE);
+		glEnable(GL_DEPTH_TEST);
+
+		// Seems to limit it at 60fps for now
+		glfwSwapInterval(1);
+
+		glfwSetTime(0.0);
+
+		// Do render loop here
 	}
 }

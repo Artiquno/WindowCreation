@@ -4,6 +4,9 @@
 #include "src/definitions.h"
 #include "src/window/window.h"
 #include "src/utils/command_parser.h"
+#include "src/shader/vertex_shader.h"
+#include "src/shader/fragment_shader.h"
+#include "src/shader/shader_program.h"
 
 #include <iostream>
 
@@ -193,7 +196,6 @@ struct Mesh
 
 int main(int argc, char** argv)
 {
-	char infoLog[512];
 	// All my images were upside down
 	stbi_set_flip_vertically_on_load(1);
 
@@ -212,99 +214,9 @@ int main(int argc, char** argv)
 	glfwSetWindowSizeCallback(window, resizeCallback);
 
 	// TODO: Maybe organize the code a bit? No? Ok...
-	int fileError;
-	// Read vertex shader
-	FILE *vertexShaderFile = NULL;
-	fileError = fopen_s(&vertexShaderFile, "shaders/vertex_shader.glsl", "r");
-	if (fileError)
-	{
-		std::cerr << "Failed to open file " << fileError << std::endl;
-		exit(ExitStatus::FileOpenError);
-	}
-
-	fseek(vertexShaderFile, 0, SEEK_END);
-	int size = ftell(vertexShaderFile);
-	fseek(vertexShaderFile, 0, SEEK_SET);
-
-	char* vertexShaderSource = new char[size];
-	fread(vertexShaderSource, sizeof(char), size, vertexShaderFile);
-	fclose(vertexShaderFile);
-	if (vertexShaderSource == NULL)
-	{
-		std::cerr << "Could not load vertex shader" << std::endl;
-		exit(ExitStatus::FileReadError);
-	}
-
-	// Create vertex shader program
-	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexShaderSource, &size);
-	glCompileShader(vertexShader);
-	free(vertexShaderSource);
-
-	// Get compile info
-	int success;
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(vertexShader, sizeof(infoLog), NULL, infoLog);
-		std::cout << "Failed to compile vertex shader:" << std::endl << infoLog << std::endl;
-		exit(ExitStatus::VertexShaderError);
-	}
-
-	// Read fragment shader file
-	FILE *fFragmentShader;
-	fileError = fopen_s(&fFragmentShader, "shaders/fragment_shader.glsl", "r");
-	if (fileError)
-	{
-		std::cerr << "Failed to open file: " << fileError << std::endl;
-		exit(ExitStatus::FileOpenError);
-	}
-
-	fseek(fFragmentShader, 0, SEEK_END);
-	int fragSize = ftell(fFragmentShader);
-	fseek(fFragmentShader, 0, SEEK_SET);
-
-	char* fragmentShaderSource = new char[fragSize];
-	fread(fragmentShaderSource, sizeof(char), fragSize, fFragmentShader);
-	fclose(fFragmentShader);
-	if (fragmentShaderSource == NULL)
-	{
-		std::cerr << "Failed to read fragment shader from file" << std::endl;
-		exit(ExitStatus::FileReadError);
-	}
-
-	// Create and compile fragment shader
-	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, &fragSize);
-	glCompileShader(fragmentShader);
-	free(fragmentShaderSource);
-
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(fragmentShader, sizeof(infoLog), NULL, infoLog);
-		std::cout << "Failed to compile fragment shader:" << std::endl << infoLog << std::endl;
-		exit(ExitStatus::FragmentShaderError);
-	}
 
 	// Create shader program
-	unsigned int shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-
-	// Check for errors
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if (!success)
-	{
-		glGetProgramInfoLog(shaderProgram, sizeof(infoLog), NULL, infoLog);
-		std::cerr << "Failed to link shader program:" << std::endl << infoLog << std::endl;
-		exit(ExitStatus::ShaderProgramLinkError);
-	}
-
-	// Cleanup
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
+	Shader::Program program("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
 
 	// Create vertex objects
 	float verts[] = {
@@ -429,12 +341,6 @@ int main(int argc, char** argv)
 	// Seems to limit it at (roughly) 60fps
 	glfwSwapInterval(1);
 
-	GLint colorLoc = glGetUniformLocation(shaderProgram, "color");
-
-	GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
-	GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
-	GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
-
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	//glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
@@ -455,8 +361,8 @@ int main(int argc, char** argv)
 		float frameRate = 1.0f / deltaTime;	// Is this accurate?
 		//std::cout << frameRate << "fps" << std::endl;
 
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		program.setMatrix4f("view", 1, GL_FALSE, view);
+		program.setMatrix4f("projection", 1, GL_FALSE, projection);
 
 		glm::mat4 transform;
 		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, -1.0f));
@@ -464,13 +370,13 @@ int main(int argc, char** argv)
 		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 		transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.0f));
 
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transform));
+		program.setMatrix4f("model", 1, GL_FALSE, transform);
 		GLfloat col[] = { 1.0f, 1.0f, 1.0f };
-		glUniform3fv(colorLoc, 1, col);
+		program.setFloat3("color", 1, col);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glUseProgram(shaderProgram);
+		program.use();
 
 		glBindVertexArray(vao);
 		glBindTexture(GL_TEXTURE_2D, texture);
@@ -485,15 +391,13 @@ int main(int argc, char** argv)
 		trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 1.0f));
 		//trans = glm::translate(trans, glm::vec3(sin(glfwGetTime()) / 0.75f, 0.0f, 0.0f));
 		GLfloat col2[] = { 1.0f, 0.0f, 0.0f };
-		glUniform3fv(colorLoc, 1, col2);
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(trans));
+		program.setFloat3("color", 1, col2);
+		program.setMatrix4f("model", 1, GL_FALSE, trans);
 		glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
 
 		GLfloat col3[] = { 0.0f, 1.0f, 0.0f };
-		glUniform3fv(colorLoc, 1, col3);
+		program.setFloat3("color", 1, col3);
 		glDrawElements(GL_POINTS, sizeof(indices), GL_UNSIGNED_INT, 0);
-
-		//glBindVertexArray(0);	// Probably when you want to draw more than one object
 
 		glBindVertexArray(cubeVao);
 
@@ -503,9 +407,9 @@ int main(int argc, char** argv)
 		transCube = glm::rotate(transCube, glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		transCube = glm::rotate(transCube, (float)glfwGetTime(), glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)));
 
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(transCube));
+		program.setMatrix4f("model", 1, GL_FALSE, transCube);
 		GLfloat cubeCol[] = { 0.0f, 1.0f, 1.0f };
-		glUniform3fv(colorLoc, 1, cubeCol);
+		program.setFloat3("color", 1, cubeCol);
 
 		glDrawElements(GL_TRIANGLES, sizeof(cubeIndices), GL_UNSIGNED_INT, 0);
 

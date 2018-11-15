@@ -5,8 +5,8 @@
 
 namespace Model
 {
-	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, GLenum drawMode) :
-		verts(vertices), indices(indices), drawMode(drawMode)
+	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices) :
+		verts(vertices), indices(indices)
 	{
 		// Initialize VAO
 		glGenVertexArrays(1, &vao);
@@ -48,7 +48,7 @@ namespace Model
 	{
 
 	}
-	void Mesh::draw(unsigned int tex1, unsigned int tex2, Shader::Program program, const glm::mat4& transform)
+	void Mesh::draw(GLenum drawMode, unsigned int tex1, unsigned int tex2, Shader::Program program, const glm::mat4& transform)
 	{
 		glBindVertexArray(vao);
 

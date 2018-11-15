@@ -24,14 +24,12 @@ namespace Model
 		GLuint uvVbo;
 		GLuint ebo;
 
-		GLenum drawMode;
-
 	public:
-		Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, GLenum drawMode = GL_TRIANGLES);
+		Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
 		~Mesh();
 
 		// Params are temporary until i make the model/object class
-		void draw(unsigned int tex1, unsigned int tex2, Shader::Program program, const glm::mat4& transform);
+		void draw(GLenum drawMode, unsigned int tex1, unsigned int tex2, Shader::Program program, const glm::mat4& transform);
 	};
 }
 

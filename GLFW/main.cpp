@@ -258,7 +258,6 @@ int main(int argc, char** argv)
 	};
 	
 	Model::Mesh plane(vertices, indices);
-	Model::Mesh points(vertices, indices, GL_POINTS);
 
 	// Yes yes, organize, make a class, blah blah
 	// ToDo: Find a way to set UV for each face
@@ -357,23 +356,23 @@ int main(int argc, char** argv)
 		transform = glm::rotate(transform, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 		transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.0f));
-		plane.draw(texture, rafiki, program, transform);
+		plane.draw(GL_TRIANGLES, texture, rafiki, program, transform);
 
 		glm::mat4 trans;
 		trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
 		trans = glm::rotate(trans, -(float)((glfwGetTime() * 1) + glm::radians(0.0)), glm::vec3(0.0f, 1.0f, 0.0f));
 		trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 1.0f));
-		plane.draw(texture, rafiki, program, trans);
-
+		plane.draw(GL_TRIANGLES, texture, rafiki, program, trans);
 		// Draw points
-		points.draw(texture, rafiki, program, trans);
+		plane.draw(GL_POINTS, texture, rafiki, program, trans);
 
 		glm::mat4 transCube;
 		transCube = glm::translate(transCube, glm::vec3(-0.5f, -0.5f, 0.0f));
 		transCube = glm::scale(transCube, glm::vec3(0.5f, 0.5f, 0.5f));
 		transCube = glm::rotate(transCube, glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		transCube = glm::rotate(transCube, (float)glfwGetTime(), glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f)));
-		cube.draw(rafiki, texture, program, transCube);
+		cube.draw(GL_TRIANGLES, rafiki, texture, program, transCube);
+		cube.draw(GL_POINTS, rafiki, texture, program, transCube);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

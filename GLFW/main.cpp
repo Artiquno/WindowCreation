@@ -8,6 +8,9 @@
 #include "src/shader/fragment_shader.h"
 #include "src/shader/shader_program.h"
 
+#include "src/model/mesh/vertex.h"
+#include "src/model/mesh/mesh.h"
+
 #include <iostream>
 
 #include <glm/glm.hpp>
@@ -184,16 +187,6 @@ void dropCallback(GLFWwindow *window, int count, const char **paths)
 	}
 }
 
-struct Mesh
-{
-	float *verts;
-	unsigned int *indices;
-
-	GLuint vao;
-	GLuint vbo;
-	GLuint ebo;
-};
-
 int main(int argc, char** argv)
 {
 	// All my images were upside down
@@ -218,19 +211,6 @@ int main(int argc, char** argv)
 	// Create shader program
 	Shader::Program program("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
 
-	// Create vertex objects
-	float verts[] = {
-		//     Position         Colors        Tex Coords
-		 0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		 0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f
-	};
-	unsigned int indices[] = {
-		0, 3, 1,
-		1, 3, 2
-	};
-
 	glGenTextures(1, &texture);
 
 	unsigned int rafiki;
@@ -239,24 +219,92 @@ int main(int argc, char** argv)
 	loadTexture("container.jpg", texture);
 	loadTexture("rafiki.jpg", rafiki);
 
-	// Initialize VAO
-	unsigned int vao;
-	glGenVertexArrays(1, &vao);
+	// Create vertex objects
+	float verts[] = {
+		 0.5f,  0.5f, 0.0f,
+		 0.5f, -0.5f, 0.0f,
+		-0.5f, -0.5f, 0.0f,
+		-0.5f,  0.5f, 0.0f,
+	};
+
+	float colors[] = {
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+	};
+
+	float coords[] = {
+		1.0f, 1.0f,
+		1.0f, 0.0f,
+		0.0f, 0.0f,
+		0.0f, 1.0f,
+	};
+
+	int size = sizeof(verts) / (sizeof(float) * 3);
+	std::vector<Model::Vertex> vertices;
+	for (int i = 0; i < size; ++i)
+	{
+		Model::Vertex v;
+		v.position = glm::vec3(verts[i * 3], verts[i * 3 + 1], verts[i * 3 + 2]);
+		v.color = glm::vec4(colors[i * 4], colors[i * 4 + 1], colors[i * 4 + 2], colors[i * 4 + 3]);
+		v.textureCoords = glm::vec2(coords[i * 2], coords[i * 2 + 1]);
+
+		vertices.push_back(v);
+	}
+	std::vector<unsigned int> indices = {
+		0, 3, 1,
+		1, 3, 2
+	};
+	
+	Model::Mesh plane(vertices, indices);
+	Model::Mesh points(vertices, indices, GL_POINTS);
 
 	// Yes yes, organize, make a class, blah blah
 	// ToDo: Find a way to set UV for each face
 	float cubeVerts[] = {
-		 0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,
+		 0.5f, -0.5f,  0.5f,
+		-0.5f, -0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f,
+		 0.5f,  0.5f, -0.5f,
+		 0.5f, -0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
+		-0.5f,  0.5f, -0.5f,
 	};
 
-	unsigned int cubeIndices[] = {
+	float cubeCol[] = {
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f, 0.0f,
+		1.0f, 1.0f, 1.0f, 0.0f,
+		1.0f, 1.0f, 1.0f, 0.0f,
+		1.0f, 1.0f, 1.0f, 0.0f,
+	};
+
+	float cubeUV[] = {
+		1.0f, 1.0f,
+		1.0f, 0.0f,
+		0.0f, 0.0f,
+		0.0f, 1.0f,
+		1.0f, 1.0f,
+		1.0f, 0.0f,
+		0.0f, 0.0f,
+		0.0f, 1.0f,
+	};
+
+	std::vector<Model::Vertex> cubeVertices(8);
+	for (int i = 0; i < cubeVertices.size(); ++i)
+	{
+		Model::Vertex v;
+		v.position = glm::vec3(cubeVerts[i * 3], cubeVerts[i * 3 + 1], cubeVerts[i * 3 + 2]);
+		v.color = glm::vec4(cubeCol[i * 4], cubeCol[i * 4 + 1], cubeCol[i * 4 + 2], cubeCol[i * 4 + 3]);
+		v.textureCoords = glm::vec2(cubeUV[i * 2], cubeUV[i * 2 + 1]);
+		cubeVertices[i] = v;
+	}
+	std::vector<unsigned int> cubeIndices = {
 		0, 3, 1,
 		1, 3, 2,
 
@@ -276,66 +324,7 @@ int main(int argc, char** argv)
 		4, 6, 7
 	};
 
-	unsigned int cubeVao;
-	glGenVertexArrays(1, &cubeVao);
-
-	unsigned int cubeVbo;
-	glGenBuffers(1, &cubeVbo);
-
-	unsigned int cubeEbo;
-	glGenBuffers(1, &cubeEbo);
-
-	// Initialize VBO
-	unsigned int vbo;
-	glGenBuffers(1, &vbo);
-
-	// Initialize EBO
-	unsigned int ebo;
-	glGenBuffers(1, &ebo);
-
-	// Use this vao
-	// I think the next two buffers get bound to this vao
-	// I should make sure whether this is what this means
-	glBindVertexArray(vao);
-
-	// Pass data to vbo
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-
-	// Pass data to ebo
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	// Pass vertex attributes
-	//int vertCount = sizeof(verts) / 8;
-	int stride = 8 * sizeof(float);
-	// Position
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
-	glEnableVertexAttribArray(0);
-	// Color
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
-	glEnableVertexAttribArray(1);
-	// Tex coords
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 6));
-	glEnableVertexAttribArray(2);
-
-	// Pass the cube data
-	glBindVertexArray(cubeVao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, cubeVbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVerts), cubeVerts, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeEbo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 3));
-	glEnableVertexAttribArray(1);
-
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(float) * 6));
-	glEnableVertexAttribArray(2);
+	Model::Mesh cube(cubeVertices, cubeIndices);
 
 	// Moving the camera 3.0f towards +Z
 	// The best way to move a spaceship is
@@ -359,67 +348,32 @@ int main(int argc, char** argv)
 		program.setMatrix4f("view", 1, GL_FALSE, view);
 		program.setMatrix4f("projection", 1, GL_FALSE, projection);
 
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		program.use();
+
 		glm::mat4 transform;
 		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, -1.0f));
 		transform = glm::rotate(transform, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 		transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.0f));
-
-		program.setMatrix4f("model", 1, GL_FALSE, transform);
-		GLfloat col[] = { 1.0f, 1.0f, 1.0f };
-		program.setFloat3("color", 1, col);
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		program.use();
-
-		glBindVertexArray(vao);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, rafiki);
-
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-		glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
+		plane.draw(texture, rafiki, program, transform);
 
 		glm::mat4 trans;
 		trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
-		trans = glm::rotate(trans, -(float)((glfwGetTime() * 1) + glm::radians(0.0)), glm::vec3(0.0f, 0.0f, 1.0f));
+		trans = glm::rotate(trans, -(float)((glfwGetTime() * 1) + glm::radians(0.0)), glm::vec3(0.0f, 1.0f, 0.0f));
 		trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 1.0f));
-		//trans = glm::translate(trans, glm::vec3(sin(glfwGetTime()) / 0.75f, 0.0f, 0.0f));
-		GLfloat col2[] = { 1.0f, 0.0f, 0.0f };
-		program.setFloat3("color", 1, col2);
-		program.setMatrix4f("model", 1, GL_FALSE, trans);
-		glDrawElements(GL_TRIANGLES, sizeof(indices), GL_UNSIGNED_INT, 0);
+		plane.draw(texture, rafiki, program, trans);
 
-		GLfloat col3[] = { 0.0f, 1.0f, 0.0f };
-		program.setFloat3("color", 1, col3);
-		glDrawElements(GL_POINTS, sizeof(indices), GL_UNSIGNED_INT, 0);
-
-		glBindVertexArray(cubeVao);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, rafiki);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		// Draw points
+		points.draw(texture, rafiki, program, trans);
 
 		glm::mat4 transCube;
 		transCube = glm::translate(transCube, glm::vec3(-0.5f, -0.5f, 0.0f));
 		transCube = glm::scale(transCube, glm::vec3(0.5f, 0.5f, 0.5f));
 		transCube = glm::rotate(transCube, glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		transCube = glm::rotate(transCube, (float)glfwGetTime(), glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)));
-
-		program.setMatrix4f("model", 1, GL_FALSE, transCube);
-		GLfloat cubeCol[] = { 0.0f, 1.0f, 1.0f };
-		program.setFloat3("color", 1, cubeCol);
-
-		glDrawElements(GL_TRIANGLES, sizeof(cubeIndices), GL_UNSIGNED_INT, 0);
-
-		glBindVertexArray(0);	// Probably when you want to draw more than one object
+		transCube = glm::rotate(transCube, (float)glfwGetTime(), glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f)));
+		cube.draw(rafiki, texture, program, transCube);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

@@ -99,6 +99,8 @@ namespace Window
 		glEnable(GL_PROGRAM_POINT_SIZE);
 		//glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// Seems to limit it at 60fps for now
 		glfwSwapInterval(1);

@@ -233,7 +233,11 @@ int main(int argc, char** argv)
 
 	glGenTextures(1, &texture);
 
+	unsigned int rafiki;
+	glGenTextures(1, &rafiki);
+
 	loadTexture("container.jpg", texture);
+	loadTexture("rafiki.jpg", rafiki);
 
 	// Initialize VAO
 	unsigned int vao;
@@ -339,6 +343,10 @@ int main(int argc, char** argv)
 	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 	projection = glm::perspective(45.0f, (float)options.dimensions->width / (float)options.dimensions->height, 0.1f, 100.0f);
 
+	program.use();
+	program.setInt("tex1", 0);
+	program.setInt("tex2", 1);
+
 	float lastTime = 0;
 	while (!glfwWindowShouldClose(window))
 	{
@@ -366,7 +374,12 @@ int main(int argc, char** argv)
 		program.use();
 
 		glBindVertexArray(vao);
+
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, rafiki);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
@@ -387,6 +400,12 @@ int main(int argc, char** argv)
 		glDrawElements(GL_POINTS, sizeof(indices), GL_UNSIGNED_INT, 0);
 
 		glBindVertexArray(cubeVao);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, rafiki);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture);
 
 		glm::mat4 transCube;
 		transCube = glm::translate(transCube, glm::vec3(-0.5f, -0.5f, 0.0f));

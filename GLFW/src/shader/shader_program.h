@@ -39,6 +39,7 @@ namespace Shader
 		// Change the fragment shader and update
 		void setFragmentShader(std::string path);
 
+		void setInt(const std::string& name, int value);
 		// Set a float 3-vector uniform
 		void setFloat3(const std::string& name, GLsizei count, const float *value);
 		// Set a 4x4 matrix

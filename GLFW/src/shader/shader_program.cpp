@@ -33,6 +33,11 @@ namespace Shader
 		fragmentShader = FragmentShader(path);
 	}
 
+	void Program::setInt(const std::string& name, int value)
+	{
+		glUniform1i(getUniformLocation(name), value);
+	}
+
 	void Program::setFloat3(const std::string & name, GLsizei count, const float *value)
 	{
 		

@@ -26,8 +26,9 @@ namespace Model
 
 		// Pass data to vbo
 		glBindBuffer(GL_ARRAY_BUFFER, vertexVbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(std::vector<Model::Vertex>) * sizeof(Model::Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(Model::Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
 
+		// Assign attribute pointers
 		int posOffset = (int)(&vertices[0].position) - (int)(vertices.data());
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Model::Vertex), (void*)(posOffset));
 		glEnableVertexAttribArray(0);

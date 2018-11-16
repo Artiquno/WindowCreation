@@ -64,7 +64,7 @@ namespace Model
 		glBindTexture(GL_TEXTURE_2D, tex2);
 
 		// Draw
-		glDrawElements(drawMode, indices.size() * sizeof(unsigned int), GL_UNSIGNED_INT, 0);
+		glDrawElements(drawMode, indices.size(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 	}
 }

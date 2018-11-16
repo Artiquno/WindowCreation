@@ -4,8 +4,6 @@
 #include "src/definitions.h"
 #include "src/window/window.h"
 #include "src/utils/command_parser.h"
-#include "src/shader/vertex_shader.h"
-#include "src/shader/fragment_shader.h"
 #include "src/shader/shader_program.h"
 
 #include "src/model/mesh/vertex.h"
@@ -325,10 +323,29 @@ int main(int argc, char** argv)
 
 	Model::Mesh cube(cubeVertices, cubeIndices);
 
+	Model::Vertex centerVertex;
+	centerVertex.position = glm::vec3(0.0f, 0.0f, 0.0f);
+	centerVertex.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	Model::Vertex xVertex;
+	xVertex.position = glm::vec3(1.0f, 0.0f, 0.0f);
+	xVertex.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+	Model::Vertex yVertex;
+	yVertex.position = glm::vec3(0.0f, 1.0f, 0.0f);
+	yVertex.color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+	Model::Vertex zVertex;
+	zVertex.position = glm::vec3(0.0f, 0.0f, 1.0f);
+	zVertex.color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+
+	std::vector<Model::Vertex> centerVerts = { centerVertex, xVertex, yVertex, zVertex };
+	std::vector<unsigned int> centerIndex = { 0, 1, 0, 2, 0, 3 };
+	Model::Mesh center(centerVerts, centerIndex);
+
 	// Moving the camera 3.0f towards +Z
 	// The best way to move a spaceship is
 	// by moving the whole universe around it instead
 	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	view = glm::rotate(view, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	view = glm::rotate(view, glm::radians(-30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	projection = glm::perspective(45.0f, (float)options.dimensions->width / (float)options.dimensions->height, 0.1f, 100.0f);
 
 	program.use();
@@ -351,19 +368,21 @@ int main(int argc, char** argv)
 
 		program.use();
 
+		center.draw(GL_LINES, texture, texture, program, (glm::mat4()));
+
 		glm::mat4 transform;
 		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, -1.0f));
 		transform = glm::rotate(transform, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 		transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.0f));
 		plane.draw(GL_TRIANGLES, texture, rafiki, program, transform);
+		plane.draw(GL_POINTS, texture, rafiki, program, transform);
 
 		glm::mat4 trans;
 		trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
 		trans = glm::rotate(trans, -(float)((glfwGetTime() * 1) + glm::radians(0.0)), glm::vec3(0.0f, 1.0f, 0.0f));
 		trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 1.0f));
 		plane.draw(GL_TRIANGLES, texture, rafiki, program, trans);
-		// Draw points
 		plane.draw(GL_POINTS, texture, rafiki, program, trans);
 
 		glm::mat4 transCube;

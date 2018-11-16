@@ -345,7 +345,6 @@ int main(int argc, char** argv)
 	view = glm::rotate(view, glm::radians(-30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	projection = glm::perspective(45.0f, (float)options.dimensions->width / (float)options.dimensions->height, 0.1f, 100.0f);
 
-	program.use();
 	program.setInt("tex1", 0);
 	program.setInt("tex2", 1);
 
@@ -361,13 +360,11 @@ int main(int argc, char** argv)
 		glm::vec3 camForward(view[0][2], view[1][2], view[2][2]);
 
 		// These should probably be set on the camera code
-		program.use();
 		program.setMatrix4f("view", 1, GL_FALSE, view);
 		program.setMatrix4f("projection", 1, GL_FALSE, projection);
 
-		axesProgram.use();
-		program.setMatrix4f("view", 1, GL_FALSE, view);
-		program.setMatrix4f("projection", 1, GL_FALSE, projection);
+		axesProgram.setMatrix4f("view", 1, GL_FALSE, view);
+		axesProgram.setMatrix4f("projection", 1, GL_FALSE, projection);
 
 		glUseProgram(0);
 

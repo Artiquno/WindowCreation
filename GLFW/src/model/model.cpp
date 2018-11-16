@@ -72,10 +72,10 @@ namespace Model
 	}
 	void Model::drawRaw(GLenum drawMode)
 	{
-		material.use();
-		glBindVertexArray(mesh.getVao());
 		material.setMatrix4f("model", 1, GL_FALSE, transform);
+		glBindVertexArray(mesh.getVao());
 
+		material.use();
 		// Assign textures
 		for (int i = 0; i < textures.size(); ++i)
 		{
@@ -91,6 +91,7 @@ namespace Model
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
+		glUseProgram(0);
 	}
 	void Model::draw()
 	{

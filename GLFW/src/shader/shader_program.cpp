@@ -35,18 +35,23 @@ namespace Shader
 
 	void Program::setInt(const std::string& name, int value)
 	{
+		use();
 		glUniform1i(getUniformLocation(name), value);
+		glUseProgram(0);
 	}
 
 	void Program::setFloat3(const std::string & name, GLsizei count, const float *value)
 	{
-		
+		use();
 		glUniform3fv(getUniformLocation(name), count, value);
+		glUseProgram(0);
 	}
 
 	void Program::setMatrix4f(const std::string & name, GLsizei count, GLboolean transpose, const glm::mat4 & value)
 	{
+		use();
 		glUniformMatrix4fv(getUniformLocation(name), 1, transpose, glm::value_ptr(value));
+		glUseProgram(0);
 	}
 
 	void Program::link()

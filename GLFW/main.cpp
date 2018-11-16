@@ -259,14 +259,12 @@ int main(int argc, char** argv)
 
 	plane1Model.translate(glm::vec3(0.5f, -0.5f, -1.0f));
 	plane1Model.rotate(glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	plane1Model.scale(0.5f);
 
 	Model::Model plane2Model("Plane 2", plane, program);
 	plane2Model.addTexture("container.jpg");
 	plane2Model.addTexture("rafiki.jpg");
 
 	plane2Model.translate(glm::vec3(-0.5f, 0.5f, 0.0f));
-	plane2Model.scale(0.5f);
 
 	// Yes yes, organize, make a class, blah blah
 	// ToDo: Find a way to set UV for each face
@@ -334,12 +332,20 @@ int main(int argc, char** argv)
 
 	Model::Mesh cube(cubeVertices, cubeIndices);
 	Model::Model cubeModel("Cube", cube, program);
+	cubeModel.addTexture("rafiki.jpg");
+	cubeModel.addTexture("container.jpg");
 
 	cubeModel.translate(glm::vec3(0.0f, 0.0f, 1.0f));
-	cubeModel.scale(0.5f);
 	//cubeModel.rotate(glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
+	Model::Model ground("Ground", plane, program);
+	ground.addTexture("container.jpg");
+	ground.translate(glm::vec3(0.0f, -2.0f, 0.0f));
+	ground.rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	ground.scale(20.0f);
+
 	std::vector<Model::Model *> models = {
+		&ground,
 		&plane1Model,
 		&plane2Model,
 		&cubeModel
@@ -365,7 +371,7 @@ int main(int argc, char** argv)
 	// Moving the camera 3.0f towards +Z
 	// The best way to move a spaceship is
 	// by moving the whole universe around it instead
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -6.0f));
 	view = glm::rotate(view, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	view = glm::rotate(view, glm::radians(-30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	projection = glm::perspective(45.0f, (float)options.dimensions->width / (float)options.dimensions->height, 0.1f, 100.0f);
@@ -392,6 +398,7 @@ int main(int argc, char** argv)
 		program.use();
 
 		glm::mat4 centerTransform;
+		centerTransform = glm::scale(centerTransform, glm::vec3(2.0f));
 		glBindVertexArray(center.getVao());
 
 		program.setMatrix4f("model", 1, GL_FALSE, centerTransform);

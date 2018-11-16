@@ -75,7 +75,7 @@ namespace Model
 		glBindVertexArray(mesh.getVao());
 		material.setMatrix4f("model", 1, GL_FALSE, transform);
 
-		// Setup shader here or something
+		// Assign textures
 		for (int i = 0; i < textures.size(); ++i)
 		{
 			glActiveTexture(GL_TEXTURE0 + i);
@@ -83,6 +83,13 @@ namespace Model
 		}
 
 		mesh.draw(drawMode);
+
+		// Clear textures
+		for (int i = 0; i < textures.size(); ++i)
+		{
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 	}
 	void Model::draw()
 	{

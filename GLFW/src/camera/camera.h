@@ -25,9 +25,14 @@ namespace Camera
 		~Camera();
 
 		void setDimensions(unsigned int width, unsigned int height);
+
+		void translate(const glm::vec3& vector);
+		void rotate(float angle, const glm::vec3& axis);
 		void setFov(float fov);
 
+
 		glm::mat4& getViewMatrix() { return viewMatrix; }
+		glm::mat4& getProjectionMatrix() { return projectionMatrix; }
 
 	private:
 		void updateProjectionMatrix();

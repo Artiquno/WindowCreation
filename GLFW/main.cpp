@@ -10,6 +10,8 @@
 #include "src/model/mesh/mesh.h"
 #include "src/model/model.h"
 
+#include "src/camera/camera.h"
+
 #include "src/utils/image.h"
 
 #include <iostream>
@@ -162,6 +164,7 @@ int main(int argc, char** argv)
 	parser.parse(argc, argv);
 	Utils::CommandParser::Options options = parser.getOptions();
 
+	Camera::Camera camera(options.dimensions->width, options.dimensions->height);
 	Window::Window windowClass("Window", false, options.dimensions->width, options.dimensions->height);
 	windowClass.getInputManager()->registerKeyCallback(keyCallback);
 	GLFWwindow *window = windowClass.getWindow();
@@ -336,14 +339,6 @@ int main(int argc, char** argv)
 	Model::Mesh center(centerVerts, centerIndex);
 	Model::Model axes("Axes", center, axesProgram);
 	//axes.scale(1.0f);
-	
-	// Moving the camera 3.0f towards +Z
-	// The best way to move a spaceship is
-	// by moving the whole universe around it instead
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -6.0f));
-	view = glm::rotate(view, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	view = glm::rotate(view, glm::radians(-30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	projection = glm::perspective(45.0f, (float)options.dimensions->width / (float)options.dimensions->height, 0.1f, 100.0f);
 
 	program.setInt("tex1", 0);
 	program.setInt("tex2", 1);
@@ -357,14 +352,16 @@ int main(int argc, char** argv)
 		float frameRate = 1.0f / deltaTime;	// Is this accurate?
 		//std::cout << frameRate << "fps" << std::endl;
 
+		camera.rotate(deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
+
 		glm::vec3 camForward(view[0][2], view[1][2], view[2][2]);
 
 		// These should probably be set on the camera code
-		program.setMatrix4f("view", 1, GL_FALSE, view);
-		program.setMatrix4f("projection", 1, GL_FALSE, projection);
+		program.setMatrix4f("view", 1, GL_FALSE, camera.getViewMatrix());
+		program.setMatrix4f("projection", 1, GL_FALSE, camera.getProjectionMatrix());
 
-		axesProgram.setMatrix4f("view", 1, GL_FALSE, view);
-		axesProgram.setMatrix4f("projection", 1, GL_FALSE, projection);
+		axesProgram.setMatrix4f("view", 1, GL_FALSE, camera.getViewMatrix());
+		axesProgram.setMatrix4f("projection", 1, GL_FALSE, camera.getProjectionMatrix());
 
 		glUseProgram(0);
 

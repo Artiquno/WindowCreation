@@ -32,8 +32,10 @@ namespace Window
 
 		InputManager inputManager;
 
+		Camera::Camera mainCamera;
+
 	public:
-		Window(std::string name, bool isFullscreen = false, int width = 640, int height = 480);
+		Window(std::string name, Camera::Camera camera, bool isFullscreen = false, int width = 640, int height = 480);
 		static void glfwErrorCallback(int error, const char *description);
 
 		GLFWwindow *const getWindow() const { return window; }

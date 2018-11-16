@@ -171,6 +171,7 @@ copy /y $(SolutionDir)lib\glew\bin\Release\Win32\glew32.dll $(OutputPath);</Comm
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\camera\camera.cpp" />
     <ClCompile Include="src\model\mesh\mesh.cpp" />
+    <ClCompile Include="src\model\model.cpp" />
     <ClCompile Include="src\shader\fragment_shader.cpp" />
     <ClCompile Include="src\shader\shader.cpp" />
     <ClCompile Include="src\shader\shader_program.cpp" />
@@ -190,6 +191,7 @@ copy /y $(SolutionDir)lib\glew\bin\Release\Win32\glew32.dll $(OutputPath);</Comm
     <ClInclude Include="src\camera\camera.h" />
     <ClInclude Include="src\model\mesh\mesh.h" />
     <ClInclude Include="src\model\mesh\vertex.h" />
+    <ClInclude Include="src\model\model.h" />
     <ClInclude Include="src\shader\fragment_shader.h" />
     <ClInclude Include="src\shader\shader.h" />
     <ClInclude Include="src\shader\shader_program.h" />

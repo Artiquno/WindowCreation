@@ -49,19 +49,9 @@ namespace Model
 	{
 
 	}
-	void Mesh::draw(GLenum drawMode, unsigned int tex1, unsigned int tex2, Shader::Program program, const glm::mat4& transform)
+	void Mesh::draw(GLenum drawMode)
 	{
 		glBindVertexArray(vao);
-
-		program.setMatrix4f("model", 1, GL_FALSE, transform);
-
-		// Setup shader here or something
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, tex1);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, tex2);
 
 		// Draw
 		glDrawElements(drawMode, indices.size(), GL_UNSIGNED_INT, 0);

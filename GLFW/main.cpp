@@ -8,6 +8,7 @@
 
 #include "src/model/mesh/vertex.h"
 #include "src/model/mesh/mesh.h"
+#include "src/model/model.h"
 
 #include "src/utils/image.h"
 
@@ -252,6 +253,21 @@ int main(int argc, char** argv)
 	
 	Model::Mesh plane(vertices, indices);
 
+	Model::Model plane1Model("Plane 1", plane, program);
+	plane1Model.addTexture("container.jpg");
+	plane1Model.addTexture("rafiki.jpg");
+
+	plane1Model.translate(glm::vec3(0.5f, -0.5f, -1.0f));
+	plane1Model.rotate(glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	plane1Model.scale(0.5f);
+
+	Model::Model plane2Model("Plane 2", plane, program);
+	plane2Model.addTexture("container.jpg");
+	plane2Model.addTexture("rafiki.jpg");
+
+	plane2Model.translate(glm::vec3(-0.5f, 0.5f, 0.0f));
+	plane2Model.scale(0.5f);
+
 	// Yes yes, organize, make a class, blah blah
 	// ToDo: Find a way to set UV for each face
 	float cubeVerts[] = {
@@ -317,6 +333,17 @@ int main(int argc, char** argv)
 	};
 
 	Model::Mesh cube(cubeVertices, cubeIndices);
+	Model::Model cubeModel("Cube", cube, program);
+
+	cubeModel.translate(glm::vec3(0.0f, 0.0f, 1.0f));
+	cubeModel.scale(0.5f);
+	//cubeModel.rotate(glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+	std::vector<Model::Model *> models = {
+		&plane1Model,
+		&plane2Model,
+		&cubeModel
+	};
 
 	Model::Vertex centerVertex;
 	centerVertex.position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -364,30 +391,22 @@ int main(int argc, char** argv)
 
 		program.use();
 
-		center.draw(GL_LINES, texture, texture, program, (glm::mat4()));
+		glm::mat4 centerTransform;
+		glBindVertexArray(center.getVao());
 
-		glm::mat4 transform;
-		transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, -1.0f));
-		transform = glm::rotate(transform, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-		transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.0f));
-		plane.draw(GL_TRIANGLES, texture, rafiki, program, transform);
-		plane.draw(GL_POINTS, texture, rafiki, program, transform);
+		program.setMatrix4f("model", 1, GL_FALSE, centerTransform);
+		center.draw(GL_LINES);
+		glBindVertexArray(0);
 
-		glm::mat4 trans;
-		trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
-		trans = glm::rotate(trans, -(float)((glfwGetTime() * 1) + glm::radians(0.0)), glm::vec3(0.0f, 1.0f, 0.0f));
-		trans = glm::scale(trans, glm::vec3(0.5f, 0.5f, 1.0f));
-		plane.draw(GL_TRIANGLES, texture, rafiki, program, trans);
-		plane.draw(GL_POINTS, texture, rafiki, program, trans);
-
-		glm::mat4 transCube;
-		transCube = glm::translate(transCube, glm::vec3(0.0f, 0.0f, 1.0f));
-		transCube = glm::scale(transCube, glm::vec3(0.5f, 0.5f, 0.5f));
-		//transCube = glm::rotate(transCube, glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		transCube = glm::rotate(transCube, (float)glfwGetTime(), glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)));
-		cube.draw(GL_TRIANGLES, rafiki, texture, program, transCube);
-		cube.draw(GL_POINTS, rafiki, texture, program, transCube);
+		plane1Model.rotate(deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
+		plane2Model.rotate(-deltaTime, glm::vec3(0.0f, 1.0f, 0.0f));
+		cubeModel.rotate(deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
+		
+		for (Model::Model *model : models)
+		{
+			model->draw();
+			model->drawVerts();
+		}
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

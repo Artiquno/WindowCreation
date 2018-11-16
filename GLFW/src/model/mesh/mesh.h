@@ -29,7 +29,7 @@ namespace Model
 		~Mesh();
 
 		// Params are temporary until i make the model/object class
-		void draw(GLenum drawMode, unsigned int tex1, unsigned int tex2, Shader::Program program, const glm::mat4& transform);
+		void draw(GLenum drawMode);
 
 		GLuint getVao() const { return vao; }
 	};

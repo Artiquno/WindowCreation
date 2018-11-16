@@ -16,7 +16,7 @@ namespace Utils
 		int bpp;
 		int desiredChannel;
 		size_t size;
-		stbi_uc *pixels;
+		stbi_us *pixels;
 
 	public:
 		Image();
@@ -32,7 +32,7 @@ namespace Utils
 		int getWidth() const { return width; }
 		int getBpp() const { return bpp; }
 		// Probably unsafe, use this until i find a better way
-		stbi_uc * const getPixels() const { return pixels; }
+		stbi_us *const getPixels() const { return pixels; }
 		const std::string& getPath() const { return path; }
 
 		void setDesiredChannel(int desiredChannel);
@@ -40,9 +40,9 @@ namespace Utils
 
 		// Copy pixels to destination
 		// destination must be allocated
-		void copyPixels(stbi_uc *destination, size_t size);
+		void copyPixels(stbi_us *destination, size_t size);
 		// Allocate memory for destination and copy pixels
-		size_t copyPixels(stbi_uc *&destination);
+		size_t copyPixels(stbi_us *&destination);
 	};
 }
 

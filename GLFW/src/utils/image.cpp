@@ -26,7 +26,8 @@ namespace Utils
 
 	void Image::load()
 	{
-		pixels = stbi_load(path.c_str(), &width, &height, &bpp, desiredChannel);
+		pixels = stbi_load_16(path.c_str(), &width, &height, &bpp, desiredChannel);
+		
 		size = width * height;
 		if (!pixels)
 		{
@@ -46,13 +47,13 @@ namespace Utils
 	{
 		this->path = path;
 	}
-	void Image::copyPixels(stbi_uc *destination, size_t size)
+	void Image::copyPixels(stbi_us *destination, size_t size)
 	{
 		memcpy(destination, pixels, size);
 	}
-	size_t Image::copyPixels(stbi_uc *&destination)
+	size_t Image::copyPixels(stbi_us *&destination)
 	{
-		destination = new stbi_uc[size];
+		destination = new stbi_us[size];
 		memcpy(destination, pixels, size);
 		return size;
 	}

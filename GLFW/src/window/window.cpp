@@ -76,9 +76,10 @@ namespace Window
 			if(image.isLoaded())
 			{
 				GLFWimage icon;
+				
 				icon.height = image.getHeight();
 				icon.width = image.getWidth();
-				icon.pixels = image.getPixels();
+				icon.pixels = (stbi_uc *)image.getPixels();
 				glfwSetWindowIcon(window, 1, &icon);
 			}
 		}

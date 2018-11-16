@@ -9,6 +9,8 @@
 #include "src/model/mesh/vertex.h"
 #include "src/model/mesh/mesh.h"
 
+#include "src/utils/image.h"
+
 #include <iostream>
 
 #include <glm/glm.hpp>
@@ -40,15 +42,8 @@ void loadTexture(const char *path, unsigned int texture);
 void loadTexture(const char *path, unsigned int texture)
 {
 	// Load texture
-	int width;
-	int height;
-	int nrChannels;
-	unsigned short *texData = stbi_load_16(path, &width, &height, &nrChannels, 0);
-	if (!texData)
-	{
-		std::cerr << "Could not open image " << path << std::endl;
-		return;
-	}
+	Utils::Image image(path);
+	stbi_us *pixels = image.getPixels();
 	
 	glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -61,10 +56,10 @@ void loadTexture(const char *path, unsigned int texture)
 	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	// Set texture data and create mipmaps
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_SHORT, texData);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.getWidth(), image.getHeight(), 0, GL_RGB, GL_UNSIGNED_SHORT, pixels);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	// Texture is free! Master gave pointer to Texture!
-	stbi_image_free(texData);
+	//stbi_image_free(pixels);
 }
 
 void resizeCallback(GLFWwindow *window, int width, int height)
@@ -361,6 +356,7 @@ int main(int argc, char** argv)
 		float frameRate = 1.0f / deltaTime;	// Is this accurate?
 		//std::cout << frameRate << "fps" << std::endl;
 
+		glm::vec3 camForward(view[0][2], view[1][2], view[2][2]);
 		program.setMatrix4f("view", 1, GL_FALSE, view);
 		program.setMatrix4f("projection", 1, GL_FALSE, projection);
 
@@ -386,10 +382,10 @@ int main(int argc, char** argv)
 		plane.draw(GL_POINTS, texture, rafiki, program, trans);
 
 		glm::mat4 transCube;
-		transCube = glm::translate(transCube, glm::vec3(-0.5f, -0.5f, 0.0f));
+		transCube = glm::translate(transCube, glm::vec3(0.0f, 0.0f, 1.0f));
 		transCube = glm::scale(transCube, glm::vec3(0.5f, 0.5f, 0.5f));
-		transCube = glm::rotate(transCube, glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		transCube = glm::rotate(transCube, (float)glfwGetTime(), glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f)));
+		//transCube = glm::rotate(transCube, glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		transCube = glm::rotate(transCube, (float)glfwGetTime(), glm::normalize(glm::vec3(0.0f, 0.0f, 1.0f)));
 		cube.draw(GL_TRIANGLES, rafiki, texture, program, transCube);
 		cube.draw(GL_POINTS, rafiki, texture, program, transCube);
 

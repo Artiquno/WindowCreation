@@ -183,6 +183,8 @@ copy /y $(SolutionDir)lib\glew\bin\Release\Win32\glew32.dll $(OutputPath);</Comm
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
+    <None Include="shaders\axes_f_shader.glsl" />
+    <None Include="shaders\axes_v_shader.glsl" />
     <None Include="shaders\fragment_shader.glsl" />
     <None Include="shaders\vertex_shader.glsl" />
   </ItemGroup>

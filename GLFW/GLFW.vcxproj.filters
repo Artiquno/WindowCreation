@@ -60,6 +60,12 @@
     <None Include="shaders\vertex_shader.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="shaders\axes_f_shader.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\axes_v_shader.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\camera\camera.h">

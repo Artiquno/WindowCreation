@@ -72,6 +72,7 @@ namespace Model
 	}
 	void Model::drawRaw(GLenum drawMode)
 	{
+		material.use();
 		glBindVertexArray(mesh.getVao());
 		material.setMatrix4f("model", 1, GL_FALSE, transform);
 

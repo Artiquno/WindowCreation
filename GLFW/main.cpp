@@ -37,32 +37,6 @@ void dropCallback(GLFWwindow *window, int count, const char **paths);
 // Callback for window resizing
 void resizeCallback(GLFWwindow *window, int width, int height);
 
-// Load texture for the square
-void loadTexture(const char *path, unsigned int texture);
-
-void loadTexture(const char *path, unsigned int texture)
-{
-	// Load texture
-	Utils::Image image(path);
-	stbi_us *pixels = image.getPixels();
-	
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	// Set parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// Default is repeat
-	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	// Set texture data and create mipmaps
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.getWidth(), image.getHeight(), 0, GL_RGB, GL_UNSIGNED_SHORT, pixels);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	// Texture is free! Master gave pointer to Texture!
-	//stbi_image_free(pixels);
-}
-
 void resizeCallback(GLFWwindow *window, int width, int height)
 {
 	// Otherwise we get 0/0 for the perspective ratio
@@ -156,7 +130,6 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 	}
 }
 
-unsigned int texture;
 void dropCallback(GLFWwindow *window, int count, const char **paths)
 {
 	//int width;
@@ -173,7 +146,7 @@ void dropCallback(GLFWwindow *window, int count, const char **paths)
 	//glfwSetCursor(window, cursor);
 	//stbi_image_free(pixels);
 
-	loadTexture(paths[0], texture);
+	//loadTexture(paths[0], texture);
 
 	for (int i = 0; i < count; ++i)
 	{
@@ -204,45 +177,37 @@ int main(int argc, char** argv)
 
 	// Create shader program
 	Shader::Program program("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
-
-	glGenTextures(1, &texture);
-
-	unsigned int rafiki;
-	glGenTextures(1, &rafiki);
-
-	loadTexture("container.jpg", texture);
-	loadTexture("rafiki.jpg", rafiki);
+	Shader::Program axesProgram("shaders/axes_v_shader.glsl", "shaders/axes_f_shader.glsl");
 
 	// Create vertex objects
-	float verts[] = {
-		 0.5f,  0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		-0.5f,  0.5f, 0.0f,
+	std::vector<glm::vec3> verts = {
+		glm::vec3( 0.5f,  0.5f, 0.0f),
+		glm::vec3( 0.5f, -0.5f, 0.0f),
+		glm::vec3(-0.5f, -0.5f, 0.0f),
+		glm::vec3(-0.5f,  0.5f, 0.0f),
 	};
 
-	float colors[] = {
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
+	std::vector<glm::vec4> colors = {
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
 	};
 
-	float coords[] = {
-		1.0f, 1.0f,
-		1.0f, 0.0f,
-		0.0f, 0.0f,
-		0.0f, 1.0f,
+	std::vector<glm::vec2> coords = {
+		glm::vec2(1.0f, 1.0f),
+		glm::vec2(1.0f, 0.0f),
+		glm::vec2(0.0f, 0.0f),
+		glm::vec2(0.0f, 1.0f),
 	};
 
-	int size = sizeof(verts) / (sizeof(float) * 3);
 	std::vector<Model::Vertex> vertices;
-	for (int i = 0; i < size; ++i)
+	for (int i = 0; i < verts.size(); ++i)
 	{
 		Model::Vertex v;
-		v.position = glm::vec3(verts[i * 3], verts[i * 3 + 1], verts[i * 3 + 2]);
-		v.color = glm::vec4(colors[i * 4], colors[i * 4 + 1], colors[i * 4 + 2], colors[i * 4 + 3]);
-		v.textureCoords = glm::vec2(coords[i * 2], coords[i * 2 + 1]);
+		v.position = verts[i];
+		v.color = colors[i];
+		v.textureCoords = coords[i];
 
 		vertices.push_back(v);
 	}
@@ -251,20 +216,20 @@ int main(int argc, char** argv)
 		1, 3, 2
 	};
 	
-	Model::Mesh plane(vertices, indices);
+	Model::Mesh planeMesh(vertices, indices);
 
-	Model::Model plane1Model("Plane 1", plane, program);
-	plane1Model.addTexture("container.jpg");
-	plane1Model.addTexture("rafiki.jpg");
+	Model::Model plane1("Plane 1", planeMesh, program);
+	plane1.addTexture("container.jpg");
+	plane1.addTexture("rafiki.jpg");
 
-	plane1Model.translate(glm::vec3(0.5f, -0.5f, -1.0f));
-	plane1Model.rotate(glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	plane1.translate(glm::vec3(0.5f, -0.5f, -1.0f));
+	plane1.rotate(glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-	Model::Model plane2Model("Plane 2", plane, program);
-	plane2Model.addTexture("container.jpg");
-	plane2Model.addTexture("rafiki.jpg");
+	Model::Model plane2("Plane 2", planeMesh, program);
+	plane2.addTexture("container.jpg");
+	plane2.addTexture("rafiki.jpg");
 
-	plane2Model.translate(glm::vec3(-0.5f, 0.5f, 0.0f));
+	plane2.translate(glm::vec3(-0.5f, 0.5f, 0.0f));
 
 	// Yes yes, organize, make a class, blah blah
 	// ToDo: Find a way to set UV for each face
@@ -330,15 +295,15 @@ int main(int argc, char** argv)
 		4, 6, 7
 	};
 
-	Model::Mesh cube(cubeVertices, cubeIndices);
-	Model::Model cubeModel("Cube", cube, program);
+	Model::Mesh cubeMesh(cubeVertices, cubeIndices);
+	Model::Model cubeModel("Cube", cubeMesh, program);
 	cubeModel.addTexture("rafiki.jpg");
 	cubeModel.addTexture("container.jpg");
 
 	cubeModel.translate(glm::vec3(0.0f, 0.0f, 1.0f));
 	//cubeModel.rotate(glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-	Model::Model ground("Ground", plane, program);
+	Model::Model ground("Ground", planeMesh, program);
 	ground.addTexture("container.jpg");
 	ground.translate(glm::vec3(0.0f, -2.0f, 0.0f));
 	ground.rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -346,28 +311,32 @@ int main(int argc, char** argv)
 
 	std::vector<Model::Model *> models = {
 		&ground,
-		&plane1Model,
-		&plane2Model,
+		&plane1,
+		&plane2,
 		&cubeModel
 	};
 
-	Model::Vertex centerVertex;
-	centerVertex.position = glm::vec3(0.0f, 0.0f, 0.0f);
-	centerVertex.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	Model::Vertex xVertex;
-	xVertex.position = glm::vec3(1.0f, 0.0f, 0.0f);
-	xVertex.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-	Model::Vertex yVertex;
-	yVertex.position = glm::vec3(0.0f, 1.0f, 0.0f);
-	yVertex.color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-	Model::Vertex zVertex;
-	zVertex.position = glm::vec3(0.0f, 0.0f, 1.0f);
-	zVertex.color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+	std::vector<glm::vec3> cVerts = {
+		glm::vec3(1.0f,  0.0f,  0.0f),
+		glm::vec3(-1.0f,  0.0f,  0.0f),
+		glm::vec3(0.0f,  1.0f,  0.0f),
+		glm::vec3(0.0f, -1.0f,  0.0f),
+		glm::vec3(0.0f,  0.0f,  1.0f),
+		glm::vec3(0.0f,  0.0f, -1.0f)
+	};
+	std::vector<Model::Vertex> centerVerts;
+	for (glm::vec3 v : cVerts)
+	{
+		Model::Vertex vv;
+		vv.position = v;
+		centerVerts.push_back(vv);
+	}
 
-	std::vector<Model::Vertex> centerVerts = { centerVertex, xVertex, yVertex, zVertex };
-	std::vector<unsigned int> centerIndex = { 0, 1, 0, 2, 0, 3 };
+	std::vector<unsigned int> centerIndex = { 0, 1, 2, 3, 4, 5 };
 	Model::Mesh center(centerVerts, centerIndex);
-
+	Model::Model axes("Axes", center, axesProgram);
+	//axes.scale(1.0f);
+	
 	// Moving the camera 3.0f towards +Z
 	// The best way to move a spaceship is
 	// by moving the whole universe around it instead
@@ -390,23 +359,24 @@ int main(int argc, char** argv)
 		//std::cout << frameRate << "fps" << std::endl;
 
 		glm::vec3 camForward(view[0][2], view[1][2], view[2][2]);
+
+		// These should probably be set on the camera code
+		program.use();
 		program.setMatrix4f("view", 1, GL_FALSE, view);
 		program.setMatrix4f("projection", 1, GL_FALSE, projection);
 
+		axesProgram.use();
+		program.setMatrix4f("view", 1, GL_FALSE, view);
+		program.setMatrix4f("projection", 1, GL_FALSE, projection);
+
+		glUseProgram(0);
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		program.use();
+		axes.drawRaw(GL_LINES);
 
-		glm::mat4 centerTransform;
-		centerTransform = glm::scale(centerTransform, glm::vec3(2.0f));
-		glBindVertexArray(center.getVao());
-
-		program.setMatrix4f("model", 1, GL_FALSE, centerTransform);
-		center.draw(GL_LINES);
-		glBindVertexArray(0);
-
-		plane1Model.rotate(deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
-		plane2Model.rotate(-deltaTime, glm::vec3(0.0f, 1.0f, 0.0f));
+		plane1.rotate(deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
+		plane2.rotate(-deltaTime, glm::vec3(0.0f, 1.0f, 0.0f));
 		cubeModel.rotate(deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
 		
 		for (Model::Model *model : models)

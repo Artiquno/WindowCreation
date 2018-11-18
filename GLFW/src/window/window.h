@@ -7,6 +7,7 @@
 #include <glfw/glfw3.h>
 
 #include "input_manager.h"
+#include "../camera/camera.h"
 
 namespace Window
 {
@@ -40,6 +41,7 @@ namespace Window
 
 		GLFWwindow *const getWindow() const { return window; }
 		InputManager * getInputManager() { return &inputManager; }
+		Camera::Camera * getCamera() { return &mainCamera; }
 	private:
 		void init();
 	};

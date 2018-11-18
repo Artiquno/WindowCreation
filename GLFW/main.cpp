@@ -164,8 +164,10 @@ int main(int argc, char** argv)
 	parser.parse(argc, argv);
 	Utils::CommandParser::Options options = parser.getOptions();
 
-	Camera::Camera camera(options.dimensions->width, options.dimensions->height);
-	Window::Window windowClass("Window", false, options.dimensions->width, options.dimensions->height);
+	Window::Window windowClass("Window",
+		Camera::Camera(options.dimensions->width, options.dimensions->height),
+		false, options.dimensions->width, options.dimensions->height);
+	Camera::Camera *camera = windowClass.getCamera();
 	windowClass.getInputManager()->registerKeyCallback(keyCallback);
 	GLFWwindow *window = windowClass.getWindow();
 
@@ -236,46 +238,46 @@ int main(int argc, char** argv)
 
 	// Yes yes, organize, make a class, blah blah
 	// ToDo: Find a way to set UV for each face
-	float cubeVerts[] = {
-		 0.5f,  0.5f,  0.5f,
-		 0.5f, -0.5f,  0.5f,
-		-0.5f, -0.5f,  0.5f,
-		-0.5f,  0.5f,  0.5f,
-		 0.5f,  0.5f, -0.5f,
-		 0.5f, -0.5f, -0.5f,
-		-0.5f, -0.5f, -0.5f,
-		-0.5f,  0.5f, -0.5f,
+	std::vector<glm::vec3> cubeVerts = {
+		glm::vec3( 0.5f,  0.5f,  0.5f),
+		glm::vec3( 0.5f, -0.5f,  0.5f),
+		glm::vec3(-0.5f, -0.5f,  0.5f),
+		glm::vec3(-0.5f,  0.5f,  0.5f),
+		glm::vec3( 0.5f,  0.5f, -0.5f),
+		glm::vec3( 0.5f, -0.5f, -0.5f),
+		glm::vec3(-0.5f, -0.5f, -0.5f),
+		glm::vec3(-0.5f,  0.5f, -0.5f),
 	};
 
-	float cubeCol[] = {
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f, 0.0f,
-		1.0f, 1.0f, 1.0f, 0.0f,
-		1.0f, 1.0f, 1.0f, 0.0f,
-		1.0f, 1.0f, 1.0f, 0.0f,
+	std::vector<glm::vec4> cubeCol = {
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+		glm::vec4(1.0f, 1.0f, 1.0f, 0.0f),
+		glm::vec4(1.0f, 1.0f, 1.0f, 0.0f),
+		glm::vec4(1.0f, 1.0f, 1.0f, 0.0f),
+		glm::vec4(1.0f, 1.0f, 1.0f, 0.0f),
 	};
 
-	float cubeUV[] = {
-		1.0f, 1.0f,
-		1.0f, 0.0f,
-		0.0f, 0.0f,
-		0.0f, 1.0f,
-		1.0f, 1.0f,
-		1.0f, 0.0f,
-		0.0f, 0.0f,
-		0.0f, 1.0f,
+	std::vector<glm::vec2> cubeUV = {
+		glm::vec2(1.0f, 1.0f),
+		glm::vec2(1.0f, 0.0f),
+		glm::vec2(0.0f, 0.0f),
+		glm::vec2(0.0f, 1.0f),
+		glm::vec2(1.0f, 1.0f),
+		glm::vec2(1.0f, 0.0f),
+		glm::vec2(0.0f, 0.0f),
+		glm::vec2(0.0f, 1.0f),
 	};
 
 	std::vector<Model::Vertex> cubeVertices(8);
 	for (int i = 0; i < cubeVertices.size(); ++i)
 	{
 		Model::Vertex v;
-		v.position = glm::vec3(cubeVerts[i * 3], cubeVerts[i * 3 + 1], cubeVerts[i * 3 + 2]);
-		v.color = glm::vec4(cubeCol[i * 4], cubeCol[i * 4 + 1], cubeCol[i * 4 + 2], cubeCol[i * 4 + 3]);
-		v.textureCoords = glm::vec2(cubeUV[i * 2], cubeUV[i * 2 + 1]);
+		v.position = cubeVerts[i];
+		v.color = cubeCol[i];
+		v.textureCoords = cubeUV[i];
 		cubeVertices[i] = v;
 	}
 	std::vector<unsigned int> cubeIndices = {
@@ -352,16 +354,16 @@ int main(int argc, char** argv)
 		float frameRate = 1.0f / deltaTime;	// Is this accurate?
 		//std::cout << frameRate << "fps" << std::endl;
 
-		camera.rotate(deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
+		//camera->rotate(deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
 
 		glm::vec3 camForward(view[0][2], view[1][2], view[2][2]);
 
 		// These should probably be set on the camera code
-		program.setMatrix4f("view", 1, GL_FALSE, camera.getViewMatrix());
-		program.setMatrix4f("projection", 1, GL_FALSE, camera.getProjectionMatrix());
+		program.setMatrix4f("view", 1, GL_FALSE, camera->getViewMatrix());
+		program.setMatrix4f("projection", 1, GL_FALSE, camera->getProjectionMatrix());
 
-		axesProgram.setMatrix4f("view", 1, GL_FALSE, camera.getViewMatrix());
-		axesProgram.setMatrix4f("projection", 1, GL_FALSE, camera.getProjectionMatrix());
+		axesProgram.setMatrix4f("view", 1, GL_FALSE, camera->getViewMatrix());
+		axesProgram.setMatrix4f("projection", 1, GL_FALSE, camera->getProjectionMatrix());
 
 		glUseProgram(0);
 

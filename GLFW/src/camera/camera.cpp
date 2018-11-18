@@ -8,14 +8,17 @@ namespace Camera
 		width(width), height(height), fov(fov),
 		near(near), far(far)	// Wherever you are
 	{
-		// Moving the camera 3.0f towards +Z
+		// Moving the camera 6.0f towards +Z
 		// The best way to move a spaceship is
 		// by moving the whole universe around it instead
-		//translate(glm::vec3(0.0f, 0.0f, 6.0f));
 
-		viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, 0.0f, -6.0f));
-		viewMatrix = glm::rotate(viewMatrix, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		viewMatrix = glm::rotate(viewMatrix, glm::radians(-30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		position = glm::vec3(2.0f, 1.0f, 6.0f);
+		direction = glm::vec3(0.0f, 0.0f, -1.0f);
+
+		pitch = 0.0f;
+		yaw = 0.0f;
+		/*viewMatrix = glm::rotate(viewMatrix, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		viewMatrix = glm::rotate(viewMatrix, glm::radians(-30.0f), glm::vec3(0.0f, 1.0f, 0.0f));*/
 
 		updateProjectionMatrix();
 	}
@@ -32,14 +35,19 @@ namespace Camera
 		updateProjectionMatrix();
 	}
 
-	void Camera::translate(const glm::vec3 & vector)
+	void Camera::translate(const glm::vec3& vector)
 	{
-		viewMatrix = glm::translate(viewMatrix, -vector);
+		position += glm::cross(direction, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 
-	void Camera::rotate(float angle, const glm::vec3 & axis)
+	void Camera::rotate(float pitch, float yaw)
 	{
-		viewMatrix = glm::rotate(viewMatrix, -angle, axis);
+		this->pitch += pitch;
+		this->yaw += yaw;
+
+		direction.x = cos(glm::radians(this->pitch)) * cos(glm::radians(this->yaw));
+		direction.y = sin(glm::radians(this->pitch));
+		direction.z = cos(glm::radians(this->pitch)) * sin(glm::radians(this->yaw));
 	}
 
 	void Camera::setFov(float fov)

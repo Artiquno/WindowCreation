@@ -1,6 +1,7 @@
 #include "input_manager.h"
 using namespace Window;
 
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <vector>
 #include <iostream>
@@ -8,66 +9,84 @@ using namespace Window;
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-InputManager::InputManager()
-{
-	_keyCallbacks.push_back(InputManager::defaultKeyCallback);
-}
+#include "window.h"
 
-std::vector<KeyCallback> InputManager::getKeyCallbacks()
+namespace Window
 {
-	return _keyCallbacks;
-}
 
-void InputManager::registerKeyCallback(KeyCallback cb)
-{
-	_keyCallbacks.push_back(cb);
-}
-
-void InputManager::resetKeyCallbacks()
-{
-	_keyCallbacks.clear();
-	_keyCallbacks.push_back(InputManager::defaultKeyCallback);
-}
-
-void Window::InputManager::processKeyInput(GLFWwindow * window, int key, int scancode, int action, int mods)
-{
-	auto keyCallbacks = static_cast<Window::InputManager*>(glfwGetWindowUserPointer(window))->_keyCallbacks;
-	for (auto cb : keyCallbacks)
+	InputManager::InputManager()
 	{
-		cb(window, key, scancode, action, mods);
+		_keyCallbacks.push_back(InputManager::defaultKeyCallback);
 	}
-}
 
-void InputManager::defaultKeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
-{
-	if (action == GLFW_PRESS || action == GLFW_REPEAT)
+	std::vector<KeyCallback> InputManager::getKeyCallbacks()
 	{
-		glm::mat4 view;	// Temp
-		if (key == GLFW_KEY_A)
-		{
-			view = glm::translate(view, glm::vec3(0.1f, 0.0f, 0.0f));
-		}
-		else if (key == GLFW_KEY_D)
-		{
-			view = glm::translate(view, glm::vec3(-0.1f, 0.0f, 0.0f));
-		}
+		return _keyCallbacks;
+	}
 
-		if (key == GLFW_KEY_W)
-		{
-			view = glm::translate(view, glm::vec3(0.0f, 0.0f, 0.1f));
-		}
-		else if (key == GLFW_KEY_S)
-		{
-			view = glm::translate(view, glm::vec3(0.0f, 0.0f, -0.1f));
-		}
+	void InputManager::registerKeyCallback(KeyCallback cb)
+	{
+		_keyCallbacks.push_back(cb);
+	}
 
-		if (key == GLFW_KEY_E)
+	void InputManager::resetKeyCallbacks()
+	{
+		_keyCallbacks.clear();
+		_keyCallbacks.push_back(InputManager::defaultKeyCallback);
+	}
+
+	void InputManager::processKeyInput(GLFWwindow * window, int key, int scancode, int action, int mods)
+	{
+		auto keyCallbacks = static_cast<Window *>(glfwGetWindowUserPointer(window))->getInputManager()->_keyCallbacks;
+		for (auto cb : keyCallbacks)
 		{
-			view = glm::translate(view, glm::vec3(0.0f, -0.1f, 0.0f));
-		}
-		else if (key == GLFW_KEY_Q)
-		{
-			view = glm::translate(view, glm::vec3(0.0f, 0.1f, 0.0f));
+			cb(window, key, scancode, action, mods);
 		}
 	}
+
+	void InputManager::defaultKeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+	{
+		if (action == GLFW_PRESS || action == GLFW_REPEAT)
+		{
+			Window *windowManager = static_cast<Window *>(glfwGetWindowUserPointer(window));
+			Camera::Camera *camera = windowManager->getCamera();
+
+			if (key == GLFW_KEY_A)
+			{
+				camera->translate(glm::vec3(-0.1f, 0.0f, 0.0f));
+			}
+			else if (key == GLFW_KEY_D)
+			{
+				camera->translate(glm::vec3(0.1f, 0.0f, 0.0f));
+			}
+
+			if (key == GLFW_KEY_W)
+			{
+				camera->translate(glm::vec3(0.0f, 0.0f, -0.1f));
+			}
+			else if (key == GLFW_KEY_S)
+			{
+				camera->translate(glm::vec3(0.0f, 0.0f, 0.1f));
+			}
+
+			if (key == GLFW_KEY_E)
+			{
+				camera->translate(glm::vec3(0.0f, 0.1f, 0.0f));
+			}
+			else if (key == GLFW_KEY_Q)
+			{
+				camera->translate(glm::vec3(0.0f, -0.1f, 0.0f));
+			}
+
+			if (key == GLFW_KEY_LEFT)
+			{
+				camera->rotate(0.0f, -2.0f);
+			}
+			else if (key == GLFW_KEY_RIGHT)
+			{
+				camera->rotate(0.0f, 2.0f);
+			}
+		}
+	}
+
 }

@@ -1,5 +1,6 @@
 #include "window.h"
 
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 
@@ -15,8 +16,8 @@ namespace Window
 		std::cout << description << std::endl;
 	}
 
-	Window::Window(std::string name, bool isFullscreen, int width, int height) :
-		name(name), isFullscreen(isFullscreen)
+	Window::Window(std::string name, Camera::Camera camera, bool isFullscreen, int width, int height) :
+		name(name), isFullscreen(isFullscreen), mainCamera(camera)
 	{
 		screen = new Screen();
 		screen->width = width;
@@ -88,7 +89,7 @@ namespace Window
 		glfwMakeContextCurrent(window);
 		glewInit();
 
-		glfwSetWindowUserPointer(window, &inputManager);
+		glfwSetWindowUserPointer(window, this);
 		glfwSetKeyCallback(window, InputManager::processKeyInput);
 		glViewport(0, 0, screen->width, screen->height);
 

@@ -116,7 +116,7 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 		case GLFW_KEY_Q:
 			break;
 		default:
-			const char *key_name = glfwGetKeyName(key, scancode);
+			/*const char *key_name = glfwGetKeyName(key, scancode);
 			std::cout << key << ": ";
 			if (key_name)
 			{
@@ -126,7 +126,7 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 			{
 				std::cout << scancode;
 			}
-			std::cout << std::endl;
+			std::cout << std::endl;*/
 			break;
 		}
 	}

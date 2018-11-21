@@ -80,11 +80,20 @@ namespace Window
 
 			if (key == GLFW_KEY_LEFT)
 			{
-				camera->rotate(0.0f, -2.0f);
+				camera->rotate(0.0f, -1.0f);
 			}
 			else if (key == GLFW_KEY_RIGHT)
 			{
-				camera->rotate(0.0f, 2.0f);
+				camera->rotate(0.0f, 1.0f);
+			}
+
+			if (key == GLFW_KEY_UP)
+			{
+				camera->rotate(1.0f, 0.0f);
+			}
+			else if (key == GLFW_KEY_DOWN)
+			{
+				camera->rotate(-1.0f, 0.0f);
 			}
 		}
 	}

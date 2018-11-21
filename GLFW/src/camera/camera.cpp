@@ -37,7 +37,38 @@ namespace Camera
 
 	void Camera::translate(const glm::vec3& vector)
 	{
-		position += glm::cross(direction, glm::vec3(0.0f, 1.0f, 0.0f));
+		// Can't think of a general solution
+		if (vector.z > 0.01f || vector.z < -0.01f)
+		{
+			moveForward(vector.z);
+		}
+		if (vector.y > 0.01f || vector.y < -0.01f)
+		{
+			moveVertically(vector.y);
+		}
+		if (vector.x > 0.01f || vector.x < -0.01f)
+		{
+			moveSideways(vector.x);
+		}
+	}
+
+	void Camera::moveForward(float amount)
+	{
+		// Direction points backwards
+		position += direction * (-amount);
+	}
+	void Camera::moveVertically(float amount)
+	{
+		glm::vec3 globalUp = glm::vec3(0.0f, 1.0f, 0.0f);
+		glm::vec3 localX = glm::normalize(glm::cross(direction, globalUp));
+		glm::vec3 localY = glm::normalize(glm::cross(localX, direction));
+		position += localY * amount;
+	}
+	void Camera::moveSideways(float amount)
+	{
+		glm::vec3 globalUp = glm::vec3(0.0f, 1.0f, 0.0f);
+		glm::vec3 localX = glm::normalize(glm::cross(direction, globalUp));
+		position += localX * amount;
 	}
 
 	void Camera::rotate(float pitch, float yaw)

@@ -42,6 +42,10 @@ namespace Camera
 
 	private:
 		void updateProjectionMatrix();
+
+		void moveForward(float amount);
+		void moveVertically(float amount);
+		void moveSideways(float amount);
 	};
 }
 

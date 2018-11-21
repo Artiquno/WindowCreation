@@ -366,7 +366,7 @@ int main(int argc, char** argv)
 		// N deg / sec?
 		plane1.rotate(glm::radians(45.0f * Time::deltaTime()), glm::vec3(0.0f, 0.0f, 1.0f));
 		plane2.rotate(glm::radians(-90.0f * Time::deltaTime()), glm::vec3(0.0f, 1.0f, 0.0f));
-		cubeModel.translate(glm::sin(glm::vec3(1.0f, 0.0f, 0.0f) * Time::deltaTime()));
+		cubeModel.translate(glm::vec3(Time::deltaTime(), sin(Time::getTime()) / 50.0f, 0.0f));
 		cubeModel.rotate(glm::radians(30.0f * Time::deltaTime()), glm::vec3(0.0f, 0.0f, 1.0f));
 		
 		for (Model::Model *model : models)

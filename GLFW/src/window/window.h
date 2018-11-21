@@ -36,12 +36,18 @@ namespace Window
 		Camera::Camera mainCamera;
 
 	public:
+		double time;
+
 		Window(std::string name, Camera::Camera camera, bool isFullscreen = false, int width = 640, int height = 480);
 		static void glfwErrorCallback(int error, const char *description);
 
 		GLFWwindow *const getWindow() const { return window; }
 		InputManager * getInputManager() { return &inputManager; }
 		Camera::Camera * getCamera() { return &mainCamera; }
+
+		double deltaTime() const { return glfwGetTime() - time; };
+		double frameRate() const { return 1.0 / deltaTime(); }
+
 	private:
 		void init();
 	};

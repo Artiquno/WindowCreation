@@ -22,6 +22,7 @@ namespace Window
 		screen = new Screen();
 		screen->width = width;
 		screen->height = height;
+		time = 0.0;
 		this->init();
 	}
 
@@ -108,6 +109,7 @@ namespace Window
 		glfwSwapInterval(1);
 
 		glfwSetTime(0.0);
+		this->time = 0.0;
 
 		// Do render loop here
 	}

@@ -345,14 +345,13 @@ int main(int argc, char** argv)
 	program.setInt("tex1", 0);
 	program.setInt("tex2", 1);
 
-	float lastTime = 0;
 	while (!glfwWindowShouldClose(window))
 	{
-		float deltaTime = glfwGetTime() - lastTime;
-		lastTime = glfwGetTime();
+		float deltaTime = (float)windowClass.deltaTime();
+		std::cout << windowClass.frameRate() << std::endl;
+		// Will be moved to the window class later
+		windowClass.time = glfwGetTime();
 
-		float frameRate = 1.0f / deltaTime;	// Is this accurate?
-		//std::cout << frameRate << "fps" << std::endl;
 
 		//camera->rotate(deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
 
@@ -371,9 +370,11 @@ int main(int argc, char** argv)
 
 		axes.drawRaw(GL_LINES);
 
-		plane1.rotate(deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
-		plane2.rotate(-deltaTime, glm::vec3(0.0f, 1.0f, 0.0f));
-		cubeModel.rotate(deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
+		// N deg / sec?
+		plane1.rotate(glm::radians(45.0f * deltaTime), glm::vec3(0.0f, 0.0f, 1.0f));
+		plane2.rotate(glm::radians(-90.0f * deltaTime), glm::vec3(0.0f, 1.0f, 0.0f));
+		cubeModel.translate(glm::vec3(1.0f, 0.0f, 0.0f) * deltaTime);
+		cubeModel.rotate(glm::radians(30.0f * deltaTime), glm::vec3(0.0f, 0.0f, 1.0f));
 		
 		for (Model::Model *model : models)
 		{

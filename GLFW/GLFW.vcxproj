@@ -178,6 +178,7 @@ copy /y $(SolutionDir)lib\glew\bin\Release\Win32\glew32.dll $(OutputPath);</Comm
     <ClCompile Include="src\shader\vertex_shader.cpp" />
     <ClCompile Include="src\utils\command_parser.cpp" />
     <ClCompile Include="src\utils\image.cpp" />
+    <ClCompile Include="src\utils\time.cpp" />
     <ClCompile Include="src\window\input_manager.cpp" />
     <ClCompile Include="src\window\window.cpp" />
   </ItemGroup>
@@ -200,6 +201,7 @@ copy /y $(SolutionDir)lib\glew\bin\Release\Win32\glew32.dll $(OutputPath);</Comm
     <ClInclude Include="src\shader\vertex_shader.h" />
     <ClInclude Include="src\utils\command_parser.h" />
     <ClInclude Include="src\utils\image.h" />
+    <ClInclude Include="src\utils\time.h" />
     <ClInclude Include="src\window\input_manager.h" />
     <ClInclude Include="src\window\window.h" />
   </ItemGroup>

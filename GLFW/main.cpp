@@ -13,6 +13,7 @@
 #include "src/camera/camera.h"
 
 #include "src/utils/image.h"
+#include "src/utils/time.h"
 
 #include <iostream>
 
@@ -69,61 +70,58 @@ void changeMode(GLFWwindow *window)
 	glfwSetWindowMonitor(window, monitor, 100, 100, newMode.width, newMode.height, newMode.refreshRate);
 }
 
-void changeRefreshRate(GLFWwindow *window)
-{
-
-}
-
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
 	if (action == GLFW_PRESS || action == GLFW_REPEAT)
 	{
 		Window::Window *windowManager = static_cast<Window::Window *>(glfwGetWindowUserPointer(window));
 		Camera::Camera *camera = windowManager->getCamera();
+		float speed = 10.0f;
+		float angularSpeed = 90.0f;
 
 		if (key == GLFW_KEY_A)
 		{
-			camera->translate(glm::vec3(-0.1f, 0.0f, 0.0f));
+			camera->translate(glm::vec3(-1.0f, 0.0f, 0.0f) * Time::deltaTime() * speed);
 		}
 		else if (key == GLFW_KEY_D)
 		{
-			camera->translate(glm::vec3(0.1f, 0.0f, 0.0f));
+			camera->translate(glm::vec3(1.0f, 0.0f, 0.0f) * Time::deltaTime() * speed);
 		}
 
 		if (key == GLFW_KEY_W)
 		{
-			camera->translate(glm::vec3(0.0f, 0.0f, -0.1f));
+			camera->translate(glm::vec3(0.0f, 0.0f, -1.0f) * Time::deltaTime() * speed);
 		}
 		else if (key == GLFW_KEY_S)
 		{
-			camera->translate(glm::vec3(0.0f, 0.0f, 0.1f));
+			camera->translate(glm::vec3(0.0f, 0.0f, 1.0f) * Time::deltaTime() * speed);
 		}
 
 		if (key == GLFW_KEY_E)
 		{
-			camera->translate(glm::vec3(0.0f, 0.1f, 0.0f));
+			camera->translate(glm::vec3(0.0f, 1.0f, 0.0f) * Time::deltaTime() * speed);
 		}
 		else if (key == GLFW_KEY_Q)
 		{
-			camera->translate(glm::vec3(0.0f, -0.1f, 0.0f));
+			camera->translate(glm::vec3(0.0f, -1.0f, 0.0f) * Time::deltaTime() * speed);
 		}
 
 		if (key == GLFW_KEY_LEFT)
 		{
-			camera->rotate(0.0f, -1.0f);
+			camera->rotate(0.0f, -1.0f * Time::deltaTime() * angularSpeed);
 		}
 		else if (key == GLFW_KEY_RIGHT)
 		{
-			camera->rotate(0.0f, 1.0f);
+			camera->rotate(0.0f, 1.0f * Time::deltaTime() * angularSpeed);
 		}
 
 		if (key == GLFW_KEY_UP)
 		{
-			camera->rotate(1.0f, 0.0f);
+			camera->rotate(1.0f * Time::deltaTime() * angularSpeed, 0.0f);
 		}
 		else if (key == GLFW_KEY_DOWN)
 		{
-			camera->rotate(-1.0f, 0.0f);
+			camera->rotate(-1.0f * Time::deltaTime() * angularSpeed, 0.0f);
 		}
 	}
 }
@@ -343,11 +341,10 @@ int main(int argc, char** argv)
 
 	while (!glfwWindowShouldClose(window))
 	{
-		float deltaTime = (float)windowClass.deltaTime();
-		std::cout << windowClass.frameRate() << std::endl;
+		Time::update();
+		std::cout << Time::frameRate() << std::endl;
 		// Will be moved to the window class later
 		windowClass.time = glfwGetTime();
-
 
 		//camera->rotate(deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
 
@@ -367,10 +364,10 @@ int main(int argc, char** argv)
 		axes.drawRaw(GL_LINES);
 
 		// N deg / sec?
-		plane1.rotate(glm::radians(45.0f * deltaTime), glm::vec3(0.0f, 0.0f, 1.0f));
-		plane2.rotate(glm::radians(-90.0f * deltaTime), glm::vec3(0.0f, 1.0f, 0.0f));
-		cubeModel.translate(glm::vec3(1.0f, 0.0f, 0.0f) * deltaTime);
-		cubeModel.rotate(glm::radians(30.0f * deltaTime), glm::vec3(0.0f, 0.0f, 1.0f));
+		plane1.rotate(glm::radians(45.0f * Time::deltaTime()), glm::vec3(0.0f, 0.0f, 1.0f));
+		plane2.rotate(glm::radians(-90.0f * Time::deltaTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+		cubeModel.translate(glm::sin(glm::vec3(1.0f, 0.0f, 0.0f) * Time::deltaTime()));
+		cubeModel.rotate(glm::radians(30.0f * Time::deltaTime()), glm::vec3(0.0f, 0.0f, 1.0f));
 		
 		for (Model::Model *model : models)
 		{

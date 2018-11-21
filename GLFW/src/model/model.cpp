@@ -9,9 +9,10 @@
 namespace Model
 {
 	Model::Model(const std::string& name, const Mesh& mesh, const Shader::Program& material) :
-		name(name), mesh(mesh), material(material)
+		name(name), mesh(mesh), material(material),
+		position(glm::vec3(0.0f)), rotation(glm::vec3(0.0f)), _scale(glm::vec3(1.0f))
 	{
-		this->transform = glm::mat4();
+
 	}
 	Model::~Model()
 	{
@@ -23,21 +24,21 @@ namespace Model
 
 	void Model::translate(const glm::vec3& vector)
 	{
-		transform = glm::translate(transform, vector);
+		position += vector;
 	}
 
 	void Model::rotate(float angle, const glm::vec3 & axis)
 	{
-		transform = glm::rotate(transform, angle, glm::normalize(axis));
+		rotation += angle * glm::normalize(axis);
 	}
 
 	void Model::scale(const glm::vec3 & scale)
 	{
-		transform = glm::scale(transform, scale);
+		_scale = scale;
 	}
 	void Model::scale(float scale)
 	{
-		transform = glm::scale(transform, glm::vec3(scale, scale, scale));
+		_scale *= scale;
 	}
 
 	void Model::addTexture(const std::string& path)
@@ -72,7 +73,11 @@ namespace Model
 	}
 	void Model::drawRaw(GLenum drawMode)
 	{
-		material.setMatrix4f("model", 1, GL_FALSE, transform);
+		glm::mat4 model;
+		model = glm::translate(model, position);
+		model = glm::rotate(model, glm::length(rotation), glm::normalize(rotation));
+		model = glm::scale(model, _scale);
+		material.setMatrix4f("model", 1, GL_FALSE, model);
 		glBindVertexArray(mesh.getVao());
 
 		material.use();

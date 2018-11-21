@@ -18,7 +18,9 @@ namespace Model
 		std::string name;
 		Mesh mesh;
 		Shader::Program material;
-		glm::mat4 transform;
+		glm::vec3 position;
+		glm::vec3 rotation;
+		glm::vec3 _scale;
 		std::vector<GLuint> textures;
 	public:
 		Model(const std::string& name, const Mesh& mesh, const Shader::Program& material);

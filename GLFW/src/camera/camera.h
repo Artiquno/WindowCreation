@@ -13,7 +13,7 @@ namespace Camera
 		glm::mat4 projectionMatrix;
 
 		glm::vec3 position;
-		glm::vec3 direction;
+		glm::vec3 direction;	// Backward vector
 
 		float pitch;
 		float yaw;
@@ -36,9 +36,10 @@ namespace Camera
 		void rotate(float pitch, float yaw);
 		void setFov(float fov);
 
-
-		glm::mat4 getViewMatrix() { return glm::lookAt(position, position + direction, glm::vec3(0.0f, 1.0f, 0.0f)); }
+		glm::mat4 getViewMatrix() const { return glm::lookAt(position, position + direction, glm::vec3(0.0f, 1.0f, 0.0f)); }
 		glm::mat4 getProjectionMatrix() { return projectionMatrix; }
+		// Get the forward vector of the camera
+		glm::vec3 getDirection() const { return -direction; }
 
 	private:
 		void updateProjectionMatrix();

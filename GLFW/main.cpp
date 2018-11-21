@@ -104,23 +104,23 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 			camera->translate(glm::vec3(0.0f, 0.1f, 0.0f));
 		}
 		else if (key == GLFW_KEY_Q)
-			{
+		{
 			camera->translate(glm::vec3(0.0f, -0.1f, 0.0f));
-			}
+		}
 
 		if (key == GLFW_KEY_LEFT)
-			{
+		{
 			camera->rotate(0.0f, -1.0f);
-			}
+		}
 		else if (key == GLFW_KEY_RIGHT)
-			{
+		{
 			camera->rotate(0.0f, 1.0f);
-			}
+		}
 
 		if (key == GLFW_KEY_UP)
-			{
+		{
 			camera->rotate(1.0f, 0.0f);
-			}
+		}
 		else if (key == GLFW_KEY_DOWN)
 		{
 			camera->rotate(-1.0f, 0.0f);
@@ -351,7 +351,7 @@ int main(int argc, char** argv)
 
 		//camera->rotate(deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
 
-		glm::vec3 camForward(view[0][2], view[1][2], view[2][2]);
+		glm::vec3 camForward = camera->getDirection();
 
 		// These should probably be set on the camera code
 		program.setMatrix4f("view", 1, GL_FALSE, camera->getViewMatrix());

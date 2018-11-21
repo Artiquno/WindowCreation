@@ -8,17 +8,12 @@ namespace Camera
 		width(width), height(height), fov(fov),
 		near(near), far(far)	// Wherever you are
 	{
-		// Moving the camera 6.0f towards +Z
-		// The best way to move a spaceship is
-		// by moving the whole universe around it instead
+		position = glm::vec3(2.0f, 2.0f, 6.0f);
+		//direction = glm::vec3(0.0f, 0.0f, -1.0f);
 
-		position = glm::vec3(2.0f, 1.0f, 6.0f);
-		direction = glm::vec3(0.0f, 0.0f, -1.0f);
-
-		pitch = 0.0f;
-		yaw = 0.0f;
-		/*viewMatrix = glm::rotate(viewMatrix, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		viewMatrix = glm::rotate(viewMatrix, glm::radians(-30.0f), glm::vec3(0.0f, 1.0f, 0.0f));*/
+		pitch = -15.0f;
+		yaw = -90.0f;
+		rotate(0.0f, 0.0f);	// Setup the direction
 
 		updateProjectionMatrix();
 	}

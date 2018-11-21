@@ -76,58 +76,54 @@ void changeRefreshRate(GLFWwindow *window)
 
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-	if (action == GLFW_PRESS)	// Only on (probably) key up
+	if (action == GLFW_PRESS || action == GLFW_REPEAT)
 	{
-		switch (key)
+		Window::Window *windowManager = static_cast<Window::Window *>(glfwGetWindowUserPointer(window));
+		Camera::Camera *camera = windowManager->getCamera();
+
+		if (key == GLFW_KEY_A)
 		{
-		case GLFW_KEY_ESCAPE:
-			glfwSetWindowShouldClose(window, GLFW_TRUE);
-			break;
-		case GLFW_KEY_V:
-			std::cout << glfwGetClipboardString(window) << std::endl;
-			break;
-		case GLFW_KEY_C:
-			glfwSetClipboardString(window, "Yaaay I'm a clipboard!");
-			break;
-		/*case GLFW_KEY_W:
-			changeMode(window);
-			break;*/
-		case GLFW_KEY_R:
-			changeRefreshRate(window);
-			break;
-		case GLFW_KEY_H:
-			glfwHideWindow(window);
-			break;
-		case GLFW_KEY_M:
-			if (mods & GLFW_MOD_SHIFT)
+			camera->translate(glm::vec3(-0.1f, 0.0f, 0.0f));
+		}
+		else if (key == GLFW_KEY_D)
+		{
+			camera->translate(glm::vec3(0.1f, 0.0f, 0.0f));
+		}
+
+		if (key == GLFW_KEY_W)
+		{
+			camera->translate(glm::vec3(0.0f, 0.0f, -0.1f));
+		}
+		else if (key == GLFW_KEY_S)
+		{
+			camera->translate(glm::vec3(0.0f, 0.0f, 0.1f));
+		}
+
+		if (key == GLFW_KEY_E)
+		{
+			camera->translate(glm::vec3(0.0f, 0.1f, 0.0f));
+		}
+		else if (key == GLFW_KEY_Q)
 			{
-				glfwMaximizeWindow(window);
+			camera->translate(glm::vec3(0.0f, -0.1f, 0.0f));
 			}
-			else
+
+		if (key == GLFW_KEY_LEFT)
 			{
-				glfwIconifyWindow(window);
+			camera->rotate(0.0f, -1.0f);
 			}
-			break;
-		case GLFW_KEY_W:
-		case GLFW_KEY_A:
-		case GLFW_KEY_S:
-		case GLFW_KEY_D:
-		case GLFW_KEY_E:
-		case GLFW_KEY_Q:
-			break;
-		default:
-			/*const char *key_name = glfwGetKeyName(key, scancode);
-			std::cout << key << ": ";
-			if (key_name)
+		else if (key == GLFW_KEY_RIGHT)
 			{
-				std::cout << key_name;
+			camera->rotate(0.0f, 1.0f);
 			}
-			else
+
+		if (key == GLFW_KEY_UP)
 			{
-				std::cout << scancode;
+			camera->rotate(1.0f, 0.0f);
 			}
-			std::cout << std::endl;*/
-			break;
+		else if (key == GLFW_KEY_DOWN)
+		{
+			camera->rotate(-1.0f, 0.0f);
 		}
 	}
 }

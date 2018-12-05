@@ -90,8 +90,8 @@ namespace Camera
 
 	void Camera::setFov(float fov)
 	{ 
-		if (fov <= 44.0f)
-			fov = 44.0f;
+		if (fov <= 1.0f)
+			fov = 1.0f;
 		if (fov >= 45.0f)
 			fov = 45.0f;
 
@@ -101,6 +101,6 @@ namespace Camera
 
 	void Camera::updateProjectionMatrix()
 	{
-		projectionMatrix = glm::perspective(fov, width / (float)height, near, far);
+		projectionMatrix = glm::perspective(glm::radians(fov), width / (float)height, near, far);
 	}
 }

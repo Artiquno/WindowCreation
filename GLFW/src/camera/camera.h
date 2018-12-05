@@ -42,6 +42,9 @@ namespace Camera
 		// Get the forward vector of the camera
 		glm::vec3 getDirection() const { return -direction; }
 
+		static const float rotationSensitivity;
+		static const float zoomSensitivity;
+
 	private:
 		void updateProjectionMatrix();
 

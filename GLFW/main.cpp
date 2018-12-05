@@ -75,12 +75,11 @@ void mouseCallback(GLFWwindow *window, double x, double y)
 	Window::Window *windowManager = static_cast<Window::Window *>(glfwGetWindowUserPointer(window));
 	Window::InputManager *inputManager = windowManager->getInputManager();
 	Camera::Camera *camera = windowManager->getCamera();
-	float sensitivity = 0.1f;
 
 	float dX = x - inputManager->lastX;
 	float dY = inputManager->lastY - y;	// Y coords are bot to top
-	dX *= sensitivity;
-	dY *= sensitivity;
+	dX *= Camera::Camera::rotationSensitivity;
+	dY *= Camera::Camera::rotationSensitivity;
 	inputManager->lastX = x;
 	inputManager->lastY = y;
 

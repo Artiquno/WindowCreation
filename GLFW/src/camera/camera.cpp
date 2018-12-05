@@ -4,6 +4,9 @@
 
 namespace Camera
 {
+	const float Camera::rotationSensitivity = 0.1f;
+	const float Camera::zoomSensitivity = 0.1f;
+
 	Camera::Camera(unsigned int width, unsigned int height, float fov, float near, float far) :
 		width(width), height(height), fov(fov),
 		near(near), far(far)	// Wherever you are

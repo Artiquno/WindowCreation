@@ -23,8 +23,8 @@ namespace Window
 		InputManager();
 		// Return all key/mouse handlers
 		// Is this needed? Maybe should be removed?
-		std::vector<KeyCallback> getKeyCallbacks() { return _keyCallbacks; }
-		std::vector<MouseCallback> getMouseCallbacks() { return _mouseCallbacks; }
+		std::vector<KeyCallback> getKeyCallbacks() { return keyCallbacks; }
+		std::vector<MouseCallback> getMouseCallbacks() { return mouseCallbacks; }
 		// Add new handler for key input
 		void registerKeyCallback(KeyCallback callback);
 		void registerMouseCallback(MouseCallback callback);
@@ -36,8 +36,8 @@ namespace Window
 		void processKeyInput(GLFWwindow *window);
 		static void processMouseInput(GLFWwindow *window, double x, double y);
 	private:
-		std::vector<KeyCallback> _keyCallbacks;
-		std::vector<MouseCallback> _mouseCallbacks;
+		std::vector<KeyCallback> keyCallbacks;
+		std::vector<MouseCallback> mouseCallbacks;
 
 		// Do some non-overwritable stuff
 		static void defaultKeyCallback(GLFWwindow *window);

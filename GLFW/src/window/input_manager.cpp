@@ -16,8 +16,8 @@ namespace Window
 
 	InputManager::InputManager()
 	{
-		_keyCallbacks.push_back(InputManager::defaultKeyCallback);
-		_mouseCallbacks.push_back(InputManager::defaultMouseCallback);
+		keyCallbacks.push_back(InputManager::defaultKeyCallback);
+		mouseCallbacks.push_back(InputManager::defaultMouseCallback);
 
 		lastX = 100;
 		lastY = 100;
@@ -25,28 +25,28 @@ namespace Window
 
 	void InputManager::registerKeyCallback(KeyCallback cb)
 	{
-		_keyCallbacks.push_back(cb);
+		keyCallbacks.push_back(cb);
 	}
 
 	void InputManager::registerMouseCallback(MouseCallback cb)
 	{
-		_mouseCallbacks.push_back(cb);
+		mouseCallbacks.push_back(cb);
 	}
 
 	void InputManager::resetKeyCallbacks()
 	{
-		_keyCallbacks.clear();
-		_keyCallbacks.push_back(InputManager::defaultKeyCallback);
+		keyCallbacks.clear();
+		keyCallbacks.push_back(InputManager::defaultKeyCallback);
 	}
 	void InputManager::resetMouseCallbacks()
 	{
-		_mouseCallbacks.clear();
-		_mouseCallbacks.push_back(InputManager::defaultMouseCallback);
+		mouseCallbacks.clear();
+		mouseCallbacks.push_back(InputManager::defaultMouseCallback);
 	}
 
 	void InputManager::processKeyInput(GLFWwindow *window)
 	{
-		for (auto cb : _keyCallbacks)
+		for (auto cb : keyCallbacks)
 		{
 			cb(window);
 		}
@@ -54,7 +54,7 @@ namespace Window
 	void InputManager::processMouseInput(GLFWwindow *window, double x, double y)
 	{
 		auto mouseCallbacks = static_cast<Window *>(glfwGetWindowUserPointer(window))
-			->getInputManager()->_mouseCallbacks;
+			->getInputManager()->mouseCallbacks;
 		for (auto cb : mouseCallbacks)
 		{
 			cb(window, x, y);

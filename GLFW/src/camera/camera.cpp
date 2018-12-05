@@ -71,6 +71,15 @@ namespace Camera
 		this->pitch += pitch;
 		this->yaw += yaw;
 
+		if (this->pitch > 89.0f)
+		{
+			this->pitch = 89.0f;
+		}
+		if (this->pitch < -89.0f)
+		{
+			this->pitch = -89.0f;
+		}
+
 		direction.x = cos(glm::radians(this->pitch)) * cos(glm::radians(this->yaw));
 		direction.y = sin(glm::radians(this->pitch));
 		direction.z = cos(glm::radians(this->pitch)) * sin(glm::radians(this->yaw));

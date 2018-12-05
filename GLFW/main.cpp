@@ -32,7 +32,7 @@ Utils::CommandParser parser;
 // Function to call on key input
 // Moved to InputManager but i'm leaving this here
 // to prove a point NYEH HEH HEH HEH!
-void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+void keyCallback(GLFWwindow *window);
 
 // On drop callback
 void dropCallback(GLFWwindow *window, int count, const char **paths);
@@ -70,59 +70,61 @@ void changeMode(GLFWwindow *window)
 	glfwSetWindowMonitor(window, monitor, 100, 100, newMode.width, newMode.height, newMode.refreshRate);
 }
 
-void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+void mouseCallback(GLFWwindow *window, double x, double y)
 {
-	if (action == GLFW_PRESS || action == GLFW_REPEAT)
+	Window::Window *windowManager = static_cast<Window::Window *>(glfwGetWindowUserPointer(window));
+	Window::InputManager *inputManager = windowManager->getInputManager();
+	Camera::Camera *camera = windowManager->getCamera();
+	float sensitivity = 0.1f;
+
+	float dX = x - inputManager->lastX;
+	float dY = inputManager->lastY - y;	// Y coords are bot to top
+	dX *= sensitivity;
+	dY *= sensitivity;
+	inputManager->lastX = x;
+	inputManager->lastY = y;
+
+	camera->rotate(dY, 0.0f);
+	camera->rotate(0.0f, dX);
+}
+
+void keyCallback(GLFWwindow *window)
+{
+	Window::Window *windowManager = static_cast<Window::Window *>(glfwGetWindowUserPointer(window));
+	Camera::Camera *camera = windowManager->getCamera();
+	float speed = 10.0f;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+		speed *= 4.0f;
+	else if (glfwGetKey(window, GLFW_KEY_LEFT_ALT))
+		speed *= 0.25f;
+
+	float angularSpeed = 90.0f;
+
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
-		Window::Window *windowManager = static_cast<Window::Window *>(glfwGetWindowUserPointer(window));
-		Camera::Camera *camera = windowManager->getCamera();
-		float speed = 10.0f;
-		float angularSpeed = 90.0f;
+		camera->translate(glm::vec3(-1.0f, 0.0f, 0.0f) * Time::deltaTime() * speed);
+	}
+	else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	{
+		camera->translate(glm::vec3(1.0f, 0.0f, 0.0f) * Time::deltaTime() * speed);
+	}
 
-		if (key == GLFW_KEY_A)
-		{
-			camera->translate(glm::vec3(-1.0f, 0.0f, 0.0f) * Time::deltaTime() * speed);
-		}
-		else if (key == GLFW_KEY_D)
-		{
-			camera->translate(glm::vec3(1.0f, 0.0f, 0.0f) * Time::deltaTime() * speed);
-		}
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		camera->translate(glm::vec3(0.0f, 0.0f, -1.0f) * Time::deltaTime() * speed);
+	}
+	else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	{
+		camera->translate(glm::vec3(0.0f, 0.0f, 1.0f) * Time::deltaTime() * speed);
+	}
 
-		if (key == GLFW_KEY_W)
-		{
-			camera->translate(glm::vec3(0.0f, 0.0f, -1.0f) * Time::deltaTime() * speed);
-		}
-		else if (key == GLFW_KEY_S)
-		{
-			camera->translate(glm::vec3(0.0f, 0.0f, 1.0f) * Time::deltaTime() * speed);
-		}
-
-		if (key == GLFW_KEY_E)
-		{
-			camera->translate(glm::vec3(0.0f, 1.0f, 0.0f) * Time::deltaTime() * speed);
-		}
-		else if (key == GLFW_KEY_Q)
-		{
-			camera->translate(glm::vec3(0.0f, -1.0f, 0.0f) * Time::deltaTime() * speed);
-		}
-
-		if (key == GLFW_KEY_LEFT)
-		{
-			camera->rotate(0.0f, -1.0f * Time::deltaTime() * angularSpeed);
-		}
-		else if (key == GLFW_KEY_RIGHT)
-		{
-			camera->rotate(0.0f, 1.0f * Time::deltaTime() * angularSpeed);
-		}
-
-		if (key == GLFW_KEY_UP)
-		{
-			camera->rotate(1.0f * Time::deltaTime() * angularSpeed, 0.0f);
-		}
-		else if (key == GLFW_KEY_DOWN)
-		{
-			camera->rotate(-1.0f * Time::deltaTime() * angularSpeed, 0.0f);
-		}
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+	{
+		camera->translate(glm::vec3(0.0f, 1.0f, 0.0f) * Time::deltaTime() * speed);
+	}
+	else if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+	{
+		camera->translate(glm::vec3(0.0f, -1.0f, 0.0f) * Time::deltaTime() * speed);
 	}
 }
 
@@ -163,6 +165,7 @@ int main(int argc, char** argv)
 		false, options.dimensions->width, options.dimensions->height);
 	Camera::Camera *camera = windowClass.getCamera();
 	windowClass.getInputManager()->registerKeyCallback(keyCallback);
+	windowClass.getInputManager()->registerMouseCallback(mouseCallback);
 	GLFWwindow *window = windowClass.getWindow();
 
 	// ToDo: Allow more than one handler on the user pointer
@@ -341,6 +344,8 @@ int main(int argc, char** argv)
 
 	while (!glfwWindowShouldClose(window))
 	{
+		windowClass.getInputManager()->processKeyInput(window);
+
 		Time::update();
 		std::cout << Time::frameRate() << std::endl;
 		// Will be moved to the window class later

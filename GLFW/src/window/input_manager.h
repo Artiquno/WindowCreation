@@ -9,28 +9,39 @@
 namespace Window
 {
 
-	typedef void(*KeyCallback)(GLFWwindow *window, int key, int scancode, int action, int mods);
+	typedef void(*KeyCallback)(GLFWwindow *window);
+	typedef void(*MouseCallback)(GLFWwindow *window, double x, double y);
 	// Will possibly make this an interface later to allow mouse events and other stuff
 	class InputManager
 	{
 	public:
+		// Used for mouse movement
+		double lastX;
+		double lastY;
+
 		// ToDo: Remove overloads or implement them
 		InputManager();
-		// Return all key handlers
+		// Return all key/mouse handlers
 		// Is this needed? Maybe should be removed?
-		std::vector<KeyCallback> getKeyCallbacks();
+		std::vector<KeyCallback> getKeyCallbacks() { return _keyCallbacks; }
+		std::vector<MouseCallback> getMouseCallbacks() { return _mouseCallbacks; }
 		// Add new handler for key input
 		void registerKeyCallback(KeyCallback callback);
+		void registerMouseCallback(MouseCallback callback);
 		// Clear key handlers leaving only the default
 		void resetKeyCallbacks();
+		void resetMouseCallbacks();
 
 		// Call all key handlers
-		static void processKeyInput(GLFWwindow *window, int key, int scancode, int action, int mods);
+		void processKeyInput(GLFWwindow *window);
+		static void processMouseInput(GLFWwindow *window, double x, double y);
 	private:
 		std::vector<KeyCallback> _keyCallbacks;
+		std::vector<MouseCallback> _mouseCallbacks;
 
 		// Do some non-overwritable stuff
-		static void defaultKeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+		static void defaultKeyCallback(GLFWwindow *window);
+		static void defaultMouseCallback(GLFWwindow *window, double x, double y);
 	};
 
 }

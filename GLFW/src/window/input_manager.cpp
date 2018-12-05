@@ -17,11 +17,10 @@ namespace Window
 	InputManager::InputManager()
 	{
 		_keyCallbacks.push_back(InputManager::defaultKeyCallback);
-	}
+		_mouseCallbacks.push_back(InputManager::defaultMouseCallback);
 
-	std::vector<KeyCallback> InputManager::getKeyCallbacks()
-	{
-		return _keyCallbacks;
+		lastX = 100;
+		lastY = 100;
 	}
 
 	void InputManager::registerKeyCallback(KeyCallback cb)
@@ -29,77 +28,64 @@ namespace Window
 		_keyCallbacks.push_back(cb);
 	}
 
+	void InputManager::registerMouseCallback(MouseCallback cb)
+	{
+		_mouseCallbacks.push_back(cb);
+	}
+
 	void InputManager::resetKeyCallbacks()
 	{
 		_keyCallbacks.clear();
 		_keyCallbacks.push_back(InputManager::defaultKeyCallback);
 	}
-
-	void InputManager::processKeyInput(GLFWwindow * window, int key, int scancode, int action, int mods)
+	void InputManager::resetMouseCallbacks()
 	{
-		auto keyCallbacks = static_cast<Window *>(glfwGetWindowUserPointer(window))->getInputManager()->_keyCallbacks;
-		for (auto cb : keyCallbacks)
+		_mouseCallbacks.clear();
+		_mouseCallbacks.push_back(InputManager::defaultMouseCallback);
+	}
+
+	void InputManager::processKeyInput(GLFWwindow *window)
+	{
+		for (auto cb : _keyCallbacks)
 		{
-			cb(window, key, scancode, action, mods);
+			cb(window);
+		}
+	}
+	void InputManager::processMouseInput(GLFWwindow *window, double x, double y)
+	{
+		auto mouseCallbacks = static_cast<Window *>(glfwGetWindowUserPointer(window))
+			->getInputManager()->_mouseCallbacks;
+		for (auto cb : mouseCallbacks)
+		{
+			cb(window, x, y);
 		}
 	}
 
-	void InputManager::defaultKeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+	void InputManager::defaultKeyCallback(GLFWwindow *window)
 	{
-		if (action == GLFW_PRESS)	// Only on (probably) key up
+		if(glfwGetKey(window, GLFW_KEY_ESCAPE))
+			glfwSetWindowShouldClose(window, GLFW_TRUE);
+		if(glfwGetKey(window, GLFW_KEY_V))
+			std::cout << glfwGetClipboardString(window) << std::endl;
+		if(glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+			glfwSetClipboardString(window, "Yaaay I'm a clipboard!");
+		if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)
+			glfwHideWindow(window);
+		if (glfwGetKey(window, GLFW_KEY_M))
 		{
-			switch (key)
+			if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
 			{
-			case GLFW_KEY_ESCAPE:
-				glfwSetWindowShouldClose(window, GLFW_TRUE);
-				break;
-			case GLFW_KEY_V:
-				std::cout << glfwGetClipboardString(window) << std::endl;
-				break;
-			case GLFW_KEY_C:
-				glfwSetClipboardString(window, "Yaaay I'm a clipboard!");
-				break;
-				/*case GLFW_KEY_W:
-					changeMode(window);
-					break;*/
-			case GLFW_KEY_R:
-				//changeRefreshRate(window);
-				break;
-			case GLFW_KEY_H:
-				glfwHideWindow(window);
-				break;
-			case GLFW_KEY_M:
-				if (mods & GLFW_MOD_SHIFT)
-				{
-					glfwMaximizeWindow(window);
-				}
-				else
-				{
-					glfwIconifyWindow(window);
-				}
-				break;
-			case GLFW_KEY_W:
-			case GLFW_KEY_A:
-			case GLFW_KEY_S:
-			case GLFW_KEY_D:
-			case GLFW_KEY_E:
-			case GLFW_KEY_Q:
-				break;
-			default:
-				/*const char *key_name = glfwGetKeyName(key, scancode);
-				std::cout << key << ": ";
-				if (key_name)
-				{
-					std::cout << key_name;
-				}
-				else
-				{
-					std::cout << scancode;
-				}
-				std::cout << std::endl;*/
-				break;
+				glfwMaximizeWindow(window);
+			}
+			else
+			{
+				glfwIconifyWindow(window);
 			}
 		}
 	}
 
+	void InputManager::defaultMouseCallback(GLFWwindow *window, double x, double y)
+	{
+		
+	}
 }

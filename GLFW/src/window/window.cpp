@@ -90,8 +90,10 @@ namespace Window
 		glfwMakeContextCurrent(window);
 		glewInit();
 
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 		glfwSetWindowUserPointer(window, this);
-		glfwSetKeyCallback(window, InputManager::processKeyInput);
+		glfwSetCursorPosCallback(window, InputManager::processMouseInput);
 		glViewport(0, 0, screen->width, screen->height);
 
 		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);

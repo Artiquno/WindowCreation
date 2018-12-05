@@ -94,6 +94,7 @@ namespace Window
 
 		glfwSetWindowUserPointer(window, this);
 		glfwSetCursorPosCallback(window, InputManager::processMouseInput);
+		glfwSetScrollCallback(window, InputManager::scrollCallback);
 		glViewport(0, 0, screen->width, screen->height);
 
 		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);

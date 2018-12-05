@@ -35,6 +35,7 @@ namespace Camera
 		void translate(const glm::vec3& vector);
 		void rotate(float pitch, float yaw);
 		void setFov(float fov);
+		float getFov() { return fov; }
 
 		glm::mat4 getViewMatrix() const { return glm::lookAt(position, position + direction, glm::vec3(0.0f, 1.0f, 0.0f)); }
 		glm::mat4 getProjectionMatrix() { return projectionMatrix; }

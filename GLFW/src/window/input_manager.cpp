@@ -88,4 +88,11 @@ namespace Window
 	{
 		
 	}
+
+	void InputManager::scrollCallback(GLFWwindow *window, double x, double y)
+	{
+		Camera::Camera *camera = static_cast<Window *>(glfwGetWindowUserPointer(window))->getCamera();
+		float sensitivity = 0.1f;
+		camera->setFov(camera->getFov() - ((float)y * sensitivity));
+	}
 }

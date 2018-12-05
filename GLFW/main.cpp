@@ -347,7 +347,7 @@ int main(int argc, char** argv)
 		windowClass.getInputManager()->processKeyInput(window);
 
 		Time::update();
-		std::cout << Time::frameRate() << std::endl;
+		//std::cout << Time::frameRate() << std::endl;
 		// Will be moved to the window class later
 		windowClass.time = glfwGetTime();
 

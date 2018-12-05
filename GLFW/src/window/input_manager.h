@@ -35,6 +35,8 @@ namespace Window
 		// Call all key handlers
 		void processKeyInput(GLFWwindow *window);
 		static void processMouseInput(GLFWwindow *window, double x, double y);
+
+		static void scrollCallback(GLFWwindow *window, double x, double y);
 	private:
 		std::vector<KeyCallback> keyCallbacks;
 		std::vector<MouseCallback> mouseCallbacks;

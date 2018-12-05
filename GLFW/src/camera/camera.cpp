@@ -86,7 +86,12 @@ namespace Camera
 	}
 
 	void Camera::setFov(float fov)
-	{
+	{ 
+		if (fov <= 44.0f)
+			fov = 44.0f;
+		if (fov >= 45.0f)
+			fov = 45.0f;
+
 		this->fov = fov;
 		updateProjectionMatrix();
 	}

@@ -16,6 +16,7 @@
 #include "src/utils/time.h"
 
 #include <iostream>
+#include <iomanip>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -151,6 +152,48 @@ void dropCallback(GLFWwindow *window, int count, const char **paths)
 	}
 }
 
+std::vector<Model::Vertex> createSphere(float radius = 1.0f, unsigned int rings = 16, unsigned int segments = 8);
+
+std::vector<Model::Vertex> createSphere(float radius, unsigned int rings, unsigned int segments)
+{
+	std::vector<Model::Vertex> verts((rings - 2) * segments + 2);	// Ignore top and bottom
+	Model::Vertex top;
+	top.position = glm::vec3(0.0f, 0.0f, radius);
+	top.color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+	top.textureCoords = glm::vec2(0.0f, 0.0f);	// Meh
+	verts[0] = top;
+
+	float deltaPhi = glm::pi<float>() / segments;
+	float deltaTheta = glm::two_pi<float>() / rings;
+
+	float theta = 0;
+	float phi = 0;
+	for (int ring = 0; ring < rings; ++ring)
+	{
+		theta += deltaTheta;
+		phi = 0;
+		for (int segment = 0; segment < segments - 1; ++segment)
+		{
+			phi += deltaPhi;
+			Model::Vertex v;
+			v.position = glm::vec3(radius * (glm::sin(phi) * glm::cos(theta)),
+				radius * (glm::sin(phi) * glm::sin(theta)),
+				radius * glm::cos(phi));
+			v.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+			v.textureCoords = glm::vec2(0.0f, 0.0f);
+			verts.push_back(v);
+		}
+	}
+
+	Model::Vertex bottom;
+	bottom.position = glm::vec3(0.0f, 0.0f, -radius);
+	bottom.color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	bottom.textureCoords = glm::vec2(0.0f, 0.0f);	// Also meh
+	verts.push_back(bottom);
+
+	return verts;
+}
+
 int main(int argc, char** argv)
 {
 	// All my images were upside down
@@ -179,6 +222,7 @@ int main(int argc, char** argv)
 	// Create shader program
 	Shader::Program program("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
 	Shader::Program axesProgram("shaders/axes_v_shader.glsl", "shaders/axes_f_shader.glsl");
+	//Shader::Program lighting("shaders/light_v_shader.glsl", "shaders/light_f_shader.glsl");
 
 	// Create vertex objects
 	std::vector<glm::vec3> verts = {
@@ -302,7 +346,7 @@ int main(int argc, char** argv)
 	cubeModel.addTexture("container.jpg");
 
 	cubeModel.translate(glm::vec3(0.0f, 0.0f, 1.0f));
-	//cubeModel.rotate(glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	cubeModel.rotate(glm::radians(0.01f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 	Model::Model ground("Ground", planeMesh, program);
 	ground.addTexture("container.jpg");
@@ -310,11 +354,26 @@ int main(int argc, char** argv)
 	ground.rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	ground.scale(20.0f);
 
+	auto sphereVerts = createSphere(1.0f, 16, 8);
+	std::vector<unsigned int> sphereIndices(sphereVerts.size());
+	for (int i = 0; i < sphereVerts.size(); ++i)
+	{
+		sphereIndices[i] = i;
+	}
+
+	Model::Mesh sphereMesh(sphereVerts, sphereIndices);
+	Model::Model sphere("Sphere", sphereMesh, program);
+	sphere.addTexture("rafiki.jpg");
+	sphere.addTexture("container.jpg");
+	sphere.rotate(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	sphere.translate(glm::vec3(0.0f, 1.0f, 3.0f));
+
 	std::vector<Model::Model *> models = {
 		&ground,
-		&plane1,
+		/*&plane1,
 		&plane2,
-		&cubeModel
+		&cubeModel,*/
+		//&sphere
 	};
 
 	std::vector<glm::vec3> cVerts = {
@@ -365,13 +424,15 @@ int main(int argc, char** argv)
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		axes.drawRaw(GL_LINES);
+		//axes.drawRaw(GL_LINES);
 
 		// N deg / sec?
 		plane1.rotate(glm::radians(45.0f * Time::deltaTime()), glm::vec3(0.0f, 0.0f, 1.0f));
 		plane2.rotate(glm::radians(-90.0f * Time::deltaTime()), glm::vec3(0.0f, 1.0f, 0.0f));
 		cubeModel.translate(glm::vec3(Time::deltaTime(), sin(Time::getTime()) / 50.0f, 0.0f));
-		cubeModel.rotate(glm::radians(30.0f * Time::deltaTime()), glm::vec3(0.0f, 0.0f, 1.0f));
+		//cubeModel.rotate(glm::radians(30.0f * Time::deltaTime()), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		sphere.drawVerts();
 		
 		for (Model::Model *model : models)
 		{
